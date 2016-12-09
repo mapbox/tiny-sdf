@@ -10,16 +10,23 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily) {
     this.cutoff = cutoff || 0.25;
     this.fontFamily = fontFamily || 'sans-serif';
     this.radius = radius || 8;
+    var size = this.size = this.fontSize + this.buffer * 2;
 
-    this.size = this.fontSize + this.buffer * 2;
-    this.gridOuter = new Float64Array(this.size * this.size);
-    this.gridInner = new Float64Array(this.size * this.size);
     this.canvas = document.createElement('canvas');
-    this.canvas.width = this.canvas.height = this.size;
+    this.canvas.width = this.canvas.height = size;
+
     this.ctx = this.canvas.getContext('2d');
     this.ctx.font = fontSize + 'px ' + this.fontFamily;
     this.ctx.textBaseline = 'middle';
     this.ctx.fillStyle = 'black';
+
+    // temporary arrays for the distance transform
+    this.gridOuter = new Float64Array(size * size);
+    this.gridInner = new Float64Array(size * size);
+    this.f = new Float64Array(size);
+    this.d = new Float64Array(size);
+    this.z = new Float64Array(size + 1);
+    this.v = new Int16Array(size);
 }
 
 TinySDF.prototype.draw = function (char) {
@@ -35,8 +42,8 @@ TinySDF.prototype.draw = function (char) {
         this.gridInner[i] = a === 255 ? INF : a === 0 ? 0 : Math.max(0, a / 255 - 0.5);
     }
 
-    edt(this.gridOuter, this.size, this.size);
-    edt(this.gridInner, this.size, this.size);
+    edt(this.gridOuter, this.size, this.size, this.f, this.d, this.v, this.z);
+    edt(this.gridInner, this.size, this.size, this.f, this.d, this.v, this.z);
 
     for (i = 0; i < this.size * this.size; i++) {
         var d = this.gridOuter[i] - this.gridInner[i];
@@ -51,14 +58,7 @@ TinySDF.prototype.draw = function (char) {
 };
 
 // 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/dt/
-function edt(data, width, height) {
-    var size = Math.max(width, height);
-
-    var f = new Float64Array(size);
-    var d = new Float64Array(size);
-    var z = new Float64Array(size + 1);
-    var v = new Int16Array(size);
-
+function edt(data, width, height, f, d, v, z) {
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             f[y] = data[y * width + x];
