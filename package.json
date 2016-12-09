@@ -1,0 +1,20 @@
+{
+  "name": "tiny-sdf",
+  "version": "1.0.0",
+  "description": "Browser-side SDF font generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mapbox/tiny-sdf.git"
+  },
+  "keywords": ["sdf", "signed distance fields", "font", "canvas", "text", "distance transform"],
+  "author": "Vladimir Agafonkin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mapbox/tiny-sdf/issues"
+  },
+  "homepage": "https://github.com/mapbox/tiny-sdf#readme"
+}
