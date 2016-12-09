@@ -27,11 +27,14 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily) {
     this.d = new Float64Array(size);
     this.z = new Float64Array(size + 1);
     this.v = new Int16Array(size);
+
+    // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
+    this.middle = Math.round(this.size / 2 * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
 }
 
 TinySDF.prototype.draw = function (char) {
     this.ctx.clearRect(0, 0, this.size, this.size);
-    this.ctx.fillText(char, this.buffer, this.size / 2);
+    this.ctx.fillText(char, this.buffer, this.middle);
 
     var imgData = this.ctx.getImageData(0, 0, this.size, this.size);
     var data = imgData.data;
