@@ -64,16 +64,16 @@ function edt(data, width, height) {
             f[y] = data[y * width + x];
         }
         edt1d(f, d, v, z, height);
-        for (var y = 0; y < height; y++) {
+        for (y = 0; y < height; y++) {
             data[y * width + x] = d[y];
         }
     }
-    for (var y = 0; y < height; y++) {
-        for (var x = 0; x < width; x++) {
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
             f[x] = data[y * width + x];
         }
         edt1d(f, d, v, z, width);
-        for (var x = 0; x < width; x++) {
+        for (x = 0; x < width; x++) {
             data[y * width + x] = Math.sqrt(d[x]);
         }
     }
