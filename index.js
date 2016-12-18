@@ -29,7 +29,7 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily) {
     this.v = new Int16Array(size);
 
     // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
-    this.middle = Math.round(this.size / 2 * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
+    this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
 }
 
 TinySDF.prototype.draw = function (char) {
@@ -41,8 +41,8 @@ TinySDF.prototype.draw = function (char) {
 
     for (var i = 0; i < this.size * this.size; i++) {
         var a = data[i * 4 + 3]; // alpha value
-        this.gridOuter[i] = a === 255 ? 0 : a === 0 ? INF : Math.max(0, 0.5 - a / 255);
-        this.gridInner[i] = a === 255 ? INF : a === 0 ? 0 : Math.max(0, a / 255 - 0.5);
+        this.gridOuter[i] = a === 255 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a / 255), 2);
+        this.gridInner[i] = a === 255 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a / 255 - 0.5), 2);
     }
 
     edt(this.gridOuter, this.size, this.size, this.f, this.d, this.v, this.z);
