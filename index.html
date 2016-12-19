@@ -221,13 +221,6 @@ function drawGL() {
     gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numItems);
 }
 
-var img = new Image();
-img.onload = function () {
-
-    drawGL();
-};
-img.src = 'OpenSans-Regular.png';
-
 getEl('fontsize').oninput = frame;
 
 getEl('scale').oninput = drawGL;

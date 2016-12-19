@@ -40,9 +40,9 @@ TinySDF.prototype.draw = function (char) {
     var data = imgData.data;
 
     for (var i = 0; i < this.size * this.size; i++) {
-        var a = data[i * 4 + 3]; // alpha value
-        this.gridOuter[i] = a === 255 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a / 255), 2);
-        this.gridInner[i] = a === 255 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a / 255 - 0.5), 2);
+        var a = data[i * 4 + 3] / 255; // alpha value
+        this.gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
+        this.gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
     }
 
     edt(this.gridOuter, this.size, this.size, this.f, this.d, this.v, this.z);
