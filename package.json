@@ -1,5 +1,5 @@
 {
-  "name": "tiny-sdf",
+  "name": "@mapbox/tiny-sdf",
   "version": "1.0.1",
   "description": "Browser-side SDF font generator",
   "main": "index.js",
