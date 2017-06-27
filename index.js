@@ -17,8 +17,7 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.canvas.width = this.canvas.height = size;
 
     this.ctx = this.canvas.getContext('2d');
-    /* style | variant | weight | size/line-height | family */
-    this.ctx.font = 'normal normal ' + this.fontWeight + ' ' + this.fontSize + 'px/normal ' + this.fontFamily;
+    this.ctx.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
     this.ctx.textBaseline = 'middle';
     this.ctx.fillStyle = 'black';
 
