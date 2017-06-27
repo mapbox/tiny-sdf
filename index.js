@@ -4,11 +4,12 @@ module.exports = TinySDF;
 
 var INF = 1e20;
 
-function TinySDF(fontSize, buffer, radius, cutoff, fontFamily) {
+function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.fontSize = fontSize || 24;
     this.buffer = buffer === undefined ? 3 : buffer;
     this.cutoff = cutoff || 0.25;
     this.fontFamily = fontFamily || 'sans-serif';
+    this.fontWeight = fontWeight || 'normal';
     this.radius = radius || 8;
     var size = this.size = this.fontSize + this.buffer * 2;
 
@@ -16,7 +17,8 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily) {
     this.canvas.width = this.canvas.height = size;
 
     this.ctx = this.canvas.getContext('2d');
-    this.ctx.font = fontSize + 'px ' + this.fontFamily;
+    /* style | variant | weight | size/line-height | family */
+    this.ctx.font = 'normal normal ' + this.fontWeight + ' ' + this.fontSize + 'px/normal ' + this.fontFamily;
     this.ctx.textBaseline = 'middle';
     this.ctx.fillStyle = 'black';
 

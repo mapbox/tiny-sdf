@@ -16,7 +16,13 @@ Create a TinySDF for drawing SDFs based on font parameters:
     var cutoff = 0.25  // Across the board alpha channel reduction
                        // Reduces low-alpha pixels to zero, "thins" SDF overall
 
-    var fontFamily = 'sans-serif'; // css font-family to use
-    var tinySDFGenerator = new TinySDF(fontsize, buffer, radius, cutoff, fontFamily);
+    var fontFamily = 'sans-serif'; // css font-family
+    var fontWeight = 'normal';     // css font-weight
+    var tinySDFGenerator = new TinySDF(fontsize,
+                                       buffer,
+                                       radius,
+                                       cutoff,
+                                       fontFamily,
+                                       fontWeight);
 
     var oneSDF = tinySDFGenerator.draw('泽');
