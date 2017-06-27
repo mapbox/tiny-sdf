@@ -6,3 +6,17 @@ from system fonts on the browser using Canvas 2D and
 This is very useful for [rendering text with WebGL](https://www.mapbox.com/blog/text-signed-distance-fields/).
 
 Demo: http://mapbox.github.io/tiny-sdf/
+
+## Usage
+Create a TinySDF for drawing SDFs based on font parameters:
+
+    var fontsize = 24; // Pixel font size
+    var buffer = 3;    // Pixel whitespace buffer around glyph
+    var radius = 8;    // Lower = "sharper", higher = "fuzzier"
+    var cutoff = 0.25  // Across the board alpha channel reduction
+                       // Reduces low-alpha pixels to zero, "thins" SDF overall
+
+    var fontFamily = 'sans-serif'; // css font-family to use
+    var tinySDFGenerator = new TinySDF(fontsize, buffer, radius, cutoff, fontFamily);
+
+    var oneSDF = tinySDFGenerator.draw('泽');
