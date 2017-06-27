@@ -37,10 +37,10 @@ TinySDF.prototype.draw = function (char) {
     this.ctx.fillText(char, this.buffer, this.middle);
 
     var imgData = this.ctx.getImageData(0, 0, this.size, this.size);
-    var data = imgData.data;
+    var alphaChannel = new Uint8ClampedArray(this.size * this.size);
 
     for (var i = 0; i < this.size * this.size; i++) {
-        var a = data[i * 4 + 3] / 255; // alpha value
+        var a = imgData.data[i * 4 + 3] / 255; // alpha value
         this.gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
         this.gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
     }
@@ -50,14 +50,10 @@ TinySDF.prototype.draw = function (char) {
 
     for (i = 0; i < this.size * this.size; i++) {
         var d = this.gridOuter[i] - this.gridInner[i];
-        var c = Math.max(0, Math.min(255, Math.round(255 - 255 * (d / this.radius + this.cutoff))));
-        data[4 * i + 0] = c;
-        data[4 * i + 1] = c;
-        data[4 * i + 2] = c;
-        data[4 * i + 3] = 255;
+        alphaChannel[i] = Math.max(0, Math.min(255, Math.round(255 - 255 * (d / this.radius + this.cutoff))));
     }
 
-    return imgData;
+    return alphaChannel;
 };
 
 // 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/dt/
