@@ -18,6 +18,7 @@ a { color: #0af; }
     <h1><a href="https://github.com/mapbox/tiny-sdf">TinySDF</a> demo</h1>
     <p>
         <label>Font size</label> <input id="fontsize" type="range" min="16" max="104" step="8" value="24">
+        <label>Font weight</label> <input id="fontweight" type="range" min="100" max="900" step="100" value="400">
     </p>
     <canvas id="canvas" width="1000" height="400"></canvas>
     <p id="log"></p>
@@ -95,9 +96,10 @@ function makeRGBAImageData(alphaChannel, size) {
 function updateSDF() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     var fontSize = +getEl('fontsize').value;
+    var fontWeight = +getEl('fontweight').value;
     var buffer = fontSize / 8;
     var radius = fontSize / 3;
-    var sdf = new TinySDF(fontSize, buffer, radius);
+    var sdf = new TinySDF(fontSize, buffer, radius, null, null, fontWeight);
 
     var now = performance.now();
     for (var y = 0, i = 0; y + sdf.size <= canvas.height && i < chars.length; y += sdf.size) {
@@ -107,7 +109,7 @@ function updateSDF() {
             i++;
         }
     }
-    getEl('log').innerHTML = i + ' characters (' + fontSize + 'px with ' + buffer + 'px buffer) rendered in ' + Math.round(performance.now() - now) + 'ms.';
+    getEl('log').innerHTML = i + ' characters (' + fontSize + 'px, font-weight: ' + fontWeight + ' with ' + buffer + 'px buffer) rendered in ' + Math.round(performance.now() - now) + 'ms.';
 }
 
 var canvas2 = document.getElementById('canvas2');
@@ -236,6 +238,7 @@ function drawGL() {
 }
 
 getEl('fontsize').oninput = frame;
+getEl('fontweight').oninput = frame;
 
 getEl('scale').oninput = drawGL;
 getEl('halo').oninput = drawGL;
