@@ -10,19 +10,16 @@ Demo: http://mapbox.github.io/tiny-sdf/
 ## Usage
 Create a TinySDF for drawing SDFs based on font parameters:
 
-    var fontsize = 24; // Pixel font size
-    var buffer = 3;    // Pixel whitespace buffer around glyph
-    var radius = 8;    // Lower = "sharper", higher = "fuzzier"
-    var cutoff = 0.25  // Across the board alpha channel reduction
-                       // Reduces low-alpha pixels to zero, "thins" SDF overall
+```js
+var fontsize = 24; // Font size in pixels
+var buffer = 3;    // Whitespace buffer around a glyph in pixels
+var radius = 8;    // How many pixels around the glyph shape to use for encoding distance
+var cutoff = 0.25  // How much of the radius (relative) is used for the inside part the glyph
 
-    var fontFamily = 'sans-serif'; // css font-family
-    var fontWeight = 'normal';     // css font-weight
-    var tinySDFGenerator = new TinySDF(fontsize,
-                                       buffer,
-                                       radius,
-                                       cutoff,
-                                       fontFamily,
-                                       fontWeight);
+var fontFamily = 'sans-serif'; // css font-family
+var fontWeight = 'normal';     // css font-weight
+var tinySDFGenerator = new TinySDF(fontsize, buffer, radius, cutoff, fontFamily, fontWeight);
 
-    var oneSDF = tinySDFGenerator.draw('泽');
+var oneSDF = tinySDFGenerator.draw('泽');
+// returns a Uint8ClampedArray array of alpha values (0–255) for a size x size square grid
+```
