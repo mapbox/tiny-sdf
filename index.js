@@ -1,5 +1,6 @@
 'use strict';
 
+TinySDF.convert = convert;
 module.exports = TinySDF;
 
 var INF = 1e20;
@@ -38,24 +39,29 @@ TinySDF.prototype.draw = function (char) {
     this.ctx.fillText(char, this.buffer, this.middle);
 
     var imgData = this.ctx.getImageData(0, 0, this.size, this.size);
-    var alphaChannel = new Uint8ClampedArray(this.size * this.size);
 
-    for (var i = 0; i < this.size * this.size; i++) {
-        var a = imgData.data[i * 4 + 3] / 255; // alpha value
-        this.gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
-        this.gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
+    return convert(imgData.data, this.size, this.size, this.radius, this.cutoff, this.gridOuter, this.gridInner, this.f, this.d, this.z, this.v);
+};
+
+function convert(data, width, height, radius, cutoff, gridOuter, gridInner, f, d, z, v) {
+    var alphaChannel =  new Uint8ClampedArray(width * height);
+
+    for (var i = 0; i < width * height; i++) {
+        var a = data[i * 4 + 3] / 255; // alpha value
+        gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
+        gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
     }
 
-    edt(this.gridOuter, this.size, this.size, this.f, this.d, this.v, this.z);
-    edt(this.gridInner, this.size, this.size, this.f, this.d, this.v, this.z);
+    edt(gridOuter, width, height, f, d, v, z);
+    edt(gridInner, width, height, f, d, v, z);
 
-    for (i = 0; i < this.size * this.size; i++) {
-        var d = this.gridOuter[i] - this.gridInner[i];
-        alphaChannel[i] = Math.max(0, Math.min(255, Math.round(255 - 255 * (d / this.radius + this.cutoff))));
+    for (i = 0; i < width * height; i++) {
+        var dd = gridOuter[i] - gridInner[i];
+        alphaChannel[i] = Math.max(0, Math.min(255, Math.round(255 - 255 * (dd / radius + cutoff))));
     }
 
     return alphaChannel;
-};
+}
 
 // 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/dt/
 function edt(data, width, height, f, d, v, z) {

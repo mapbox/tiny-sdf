@@ -4,7 +4,7 @@
   "description": "Browser-side SDF font generator",
   "main": "index.js",
   "scripts": {
-    "test": "eslint index.js"
+    "test": "eslint index.js convert.js"
   },
   "repository": {
     "type": "git",
@@ -30,5 +30,9 @@
   },
   "eslintConfig": {
     "extends": "mourner"
+  },
+  "dependencies": {
+    "minimist": "^1.2.0",
+    "pngjs": "^3.3.0"
   }
 }
