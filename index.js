@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports = TinySDF;
+module.exports.default = TinySDF;
 
 var INF = 1e20;
 
