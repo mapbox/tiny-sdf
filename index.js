@@ -58,7 +58,7 @@ TinySDF.prototype.draw = function (char) {
     return alphaChannel;
 };
 
-// 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/dt/
+// 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
 function edt(data, width, height, f, d, v, z) {
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
