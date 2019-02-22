@@ -19,6 +19,7 @@ a { color: #0af; }
     <p>
         <label>Font size</label> <input id="fontsize" type="range" min="16" max="104" step="8" value="24">
         <label>Font weight</label> <input id="fontweight" type="range" min="100" max="900" step="100" value="400">
+        <label>Font style</label> <select id="fontstyle" value="normal"><option value ="normal">normal</option><option value ="italic">italic</option><option value ="oblique">oblique</option></select>
     </p>
     <canvas id="canvas" width="1000" height="400"></canvas>
     <p id="log"></p>
@@ -97,9 +98,10 @@ function updateSDF() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     var fontSize = +getEl('fontsize').value;
     var fontWeight = +getEl('fontweight').value;
-    var buffer = fontSize / 8;
+    var fontStyle = getEl('fontstyle').value;
+    var buffer = fontSize / 2;
     var radius = fontSize / 3;
-    var sdf = new TinySDF(fontSize, buffer, radius, null, null, fontWeight);
+    var sdf = new TinySDF(fontSize, buffer, radius, null, null, fontWeight, fontStyle);
 
     var now = performance.now();
     for (var y = 0, i = 0; y + sdf.size <= canvas.height && i < chars.length; y += sdf.size) {
@@ -151,7 +153,7 @@ function drawText(size) {
     var textureElements = [];
 
     var fontsize = +getEl('fontsize').value;
-    var buf = fontsize / 8;
+    var buf = fontsize / 2;
     var width = fontsize + buf * 2; // glyph width
     var height = fontsize + buf * 2; // glyph height
     var bx = 0; // bearing x
@@ -239,6 +241,7 @@ function drawGL() {
 
 getEl('fontsize').oninput = frame;
 getEl('fontweight').oninput = frame;
+getEl('fontstyle').oninput = frame;
 
 getEl('scale').oninput = drawGL;
 getEl('halo').oninput = drawGL;
