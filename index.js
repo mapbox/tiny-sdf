@@ -70,7 +70,7 @@ function edt1d(data, x, m, v, z, n) {
 
     for (var q = 1, k = 0, s = 0; q < n; q++) {
         do {
-            const i = v[k];
+            var i = v[k];
             s = (data[x + q * m] - data[x + i * m] + q * q - i * i) / (q - i) / 2;
         } while (s <= z[k--]);
         k += 2;
@@ -81,7 +81,7 @@ function edt1d(data, x, m, v, z, n) {
 
     for (q = 0, k = 0; q < n; q++) {
         while (z[k + 1] < q) k++;
-        const i = v[k];
+        i = v[k];
         data[x + q * m] = (q - i) * (q - i) + data[x + i * m];
     }
 }
