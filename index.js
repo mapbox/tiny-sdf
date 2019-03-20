@@ -58,12 +58,12 @@ TinySDF.prototype.draw = function (char) {
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
 function edt(data, width, height, v, z) {
-    for (var x = 0; x < width; x++) edt1d2(data, x, width, v, z, height);
-    for (var y = 0; y < height; y++) edt1d2(data, y * width, 1, v, z, width);
+    for (var x = 0; x < width; x++) edt1d(data, x, width, v, z, height);
+    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, v, z, width);
 }
 
 // 1D squared distance transform
-function edt1d2(data, x, m, v, z, n) {
+function edt1d(data, x, m, v, z, n) {
     v[0] = 0;
     z[0] = -INF;
     z[1] = +INF;
