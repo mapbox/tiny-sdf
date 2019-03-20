@@ -58,30 +58,31 @@ TinySDF.prototype.draw = function (char) {
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
 function edt(data, width, height, v, z) {
-    for (var x = 0; x < width; x++) edt1d(data, x, width, v, z, height);
-    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, v, z, width);
+    for (var x = 0; x < width; x++) edt1d(data, x, width, height, v, z);
+    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, width, v, z);
 }
 
 // 1D squared distance transform
-function edt1d(data, x, m, v, z, n) {
+function edt1d(data, offset, stride, length, v, z) {
     v[0] = 0;
     z[0] = -INF;
     z[1] = +INF;
 
-    for (var q = 1, k = 0, s = 0; q < n; q++) {
+    for (var q = 1, k = 0, s = 0; q < length; q++) {
         do {
-            var i = v[k];
-            s = (data[x + q * m] - data[x + i * m] + q * q - i * i) / (q - i) / 2;
+            var r = v[k];
+            s = (data[offset + q * stride] - data[offset + r * stride] + q * q - r * r) / (q - r) / 2;
         } while (s <= z[k--]);
+
         k += 2;
         v[k] = q;
         z[k] = s;
         z[k + 1] = +INF;
     }
 
-    for (q = 0, k = 0; q < n; q++) {
+    for (q = 0, k = 0; q < length; q++) {
         while (z[k + 1] < q) k++;
-        i = v[k];
-        data[x + q * m] = (q - i) * (q - i) + data[x + i * m];
+        r = v[k];
+        data[offset + q * stride] = (q - r) * (q - r) + data[offset + r * stride];
     }
 }
