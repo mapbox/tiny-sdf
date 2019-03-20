@@ -71,7 +71,8 @@ function edt1d(data, offset, stride, length, v, z) {
     for (var q = 1, k = 0, s = 0; q < length; q++) {
         do {
             var r = v[k];
-            s = (data[offset + q * stride] - data[offset + r * stride] + q * q - r * r) / (q - r) / 2;
+            var d = data[offset + q * stride] - data[offset + r * stride];
+            s = (d + q * q - r * r) / (q - r) / 2;
         } while (s <= z[k--]);
 
         k += 2;
@@ -83,6 +84,6 @@ function edt1d(data, offset, stride, length, v, z) {
     for (q = 0, k = 0; q < length; q++) {
         while (z[k + 1] < q) k++;
         r = v[k];
-        data[offset + q * stride] = (q - r) * (q - r) + data[offset + r * stride];
+        data[offset + q * stride] = data[offset + r * stride] + (q - r) * (q - r);
     }
 }
