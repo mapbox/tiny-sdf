@@ -65,14 +65,16 @@ function edt(data, width, height, f, v, z) {
 
 // 1D squared distance transform
 function edt1d(grid, offset, stride, length, f, v, z) {
+    var q, k, s, r;
     v[0] = 0;
     z[0] = -INF;
     z[1] = INF;
+
     for (q = 0; q < length; q++) f[q] = grid[offset + q * stride];
 
-    for (var q = 1, k = 0, s = 0; q < length; q++) {
+    for (q = 1, k = 0, s = 0; q < length; q++) {
         do {
-            var r = v[k];
+            r = v[k];
             s = (f[q] - f[r] + q * q - r * r) / (q - r) / 2;
         } while (s <= z[k--]);
 
