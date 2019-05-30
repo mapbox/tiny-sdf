@@ -25,6 +25,7 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     // temporary arrays for the distance transform
     this.gridOuter = new Float64Array(size * size);
     this.gridInner = new Float64Array(size * size);
+    this.f = new Float64Array(size);
     this.z = new Float64Array(size + 1);
     this.v = new Uint16Array(size);
 
@@ -45,8 +46,8 @@ TinySDF.prototype.draw = function (char) {
         this.gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
     }
 
-    edt(this.gridOuter, this.size, this.size, this.v, this.z);
-    edt(this.gridInner, this.size, this.size, this.v, this.z);
+    edt(this.gridOuter, this.size, this.size, this.f, this.v, this.z);
+    edt(this.gridInner, this.size, this.size, this.f, this.v, this.z);
 
     for (i = 0; i < this.size * this.size; i++) {
         var d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
@@ -57,33 +58,33 @@ TinySDF.prototype.draw = function (char) {
 };
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
-function edt(data, width, height, v, z) {
-    for (var x = 0; x < width; x++) edt1d(data, x, width, height, v, z);
-    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, width, v, z);
+function edt(data, width, height, f, v, z) {
+    for (var x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
+    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
 }
 
 // 1D squared distance transform
-function edt1d(data, offset, stride, length, v, z) {
+function edt1d(grid, offset, stride, length, f, v, z) {
     v[0] = 0;
     z[0] = -INF;
-    z[1] = +INF;
+    z[1] = INF;
+    for (q = 0; q < length; q++) f[q] = grid[offset + q * stride];
 
     for (var q = 1, k = 0, s = 0; q < length; q++) {
         do {
             var r = v[k];
-            var d = data[offset + q * stride] - data[offset + r * stride];
-            s = (d + q * q - r * r) / (q - r) / 2;
+            s = (f[q] - f[r] + q * q - r * r) / (q - r) / 2;
         } while (s <= z[k--]);
 
         k += 2;
         v[k] = q;
         z[k] = s;
-        z[k + 1] = +INF;
+        z[k + 1] = INF;
     }
 
     for (q = 0, k = 0; q < length; q++) {
         while (z[k + 1] < q) k++;
         r = v[k];
-        data[offset + q * stride] = data[offset + r * stride] + (q - r) * (q - r);
+        grid[offset + q * stride] = f[r] + (q - r) * (q - r);
     }
 }
