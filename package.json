@@ -19,7 +19,7 @@
     "distance transform"
   ],
   "author": "Vladimir Agafonkin",
-  "license": "ISC",
+  "license": "BSD",
   "bugs": {
     "url": "https://github.com/mapbox/tiny-sdf/issues"
   },
