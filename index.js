@@ -76,9 +76,9 @@ function edt1d(grid, offset, stride, length, f, v, z) {
         do {
             r = v[k];
             s = (f[q] - f[r] + q * q - r * r) / (q - r) / 2;
-        } while (s <= z[k--]);
+        } while (s <= z[k] && --k > -1);
 
-        k += 2;
+        k++;
         v[k] = q;
         z[k] = s;
         z[k + 1] = INF;
