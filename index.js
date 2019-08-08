@@ -51,7 +51,7 @@ TinySDF.prototype.draw = function (char) {
 
     for (i = 0; i < this.size * this.size; i++) {
         var d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
-        alphaChannel[i] = Math.max(0, Math.min(255, Math.round(255 - 255 * (d / this.radius + this.cutoff))));
+        alphaChannel[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
     }
 
     return alphaChannel;
