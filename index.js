@@ -1,71 +1,76 @@
-'use strict';
+const INF = 1e20;
 
-module.exports = TinySDF;
-module.exports.default = TinySDF;
+export default class TinySDF {
+    constructor({
+        fontSize = 24,
+        buffer = 3,
+        radius = 8,
+        cutoff = 0.25,
+        fontFamily = 'sans-serif',
+        fontWeight = 'normal'
+    }) {
+        this.fontSize = fontSize;
+        this.buffer = buffer;
+        this.cutoff = cutoff;
+        this.fontFamily = fontFamily;
+        this.fontWeight = fontWeight;
+        this.radius = radius;
+        const size = this.size = this.fontSize + this.buffer * 2;
 
-var INF = 1e20;
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = this.canvas.height = size;
 
-function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
-    this.fontSize = fontSize || 24;
-    this.buffer = buffer === undefined ? 3 : buffer;
-    this.cutoff = cutoff || 0.25;
-    this.fontFamily = fontFamily || 'sans-serif';
-    this.fontWeight = fontWeight || 'normal';
-    this.radius = radius || 8;
-    var size = this.size = this.fontSize + this.buffer * 2;
+        this.ctx = this.canvas.getContext('2d');
+        this.ctx.font = `${this.fontWeight} ${this.fontSize}px ${this.fontFamily}`;
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillStyle = 'black';
 
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = this.canvas.height = size;
+        // temporary arrays for the distance transform
+        this.gridOuter = new Float64Array(size * size);
+        this.gridInner = new Float64Array(size * size);
+        this.f = new Float64Array(size);
+        this.z = new Float64Array(size + 1);
+        this.v = new Uint16Array(size);
 
-    this.ctx = this.canvas.getContext('2d');
-    this.ctx.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
-    this.ctx.textBaseline = 'middle';
-    this.ctx.fillStyle = 'black';
+        // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
+        this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
+    }
 
-    // temporary arrays for the distance transform
-    this.gridOuter = new Float64Array(size * size);
-    this.gridInner = new Float64Array(size * size);
-    this.f = new Float64Array(size);
-    this.z = new Float64Array(size + 1);
-    this.v = new Uint16Array(size);
+    draw(char) {
+        this.ctx.clearRect(0, 0, this.size, this.size);
+        this.ctx.fillText(char, this.buffer, this.middle);
 
-    // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
-    this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
+        const imgData = this.ctx.getImageData(0, 0, this.size, this.size);
+        const alphaChannel = new Uint8ClampedArray(this.size * this.size);
+
+        for (let i = 0; i < this.size * this.size; i++) {
+            const a = imgData.data[i * 4 + 3] / 255; // alpha value
+            this.gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
+            this.gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
+        }
+
+        edt(this.gridOuter, this.size, this.size, this.f, this.v, this.z);
+        edt(this.gridInner, this.size, this.size, this.f, this.v, this.z);
+
+        for (let i = 0; i < this.size * this.size; i++) {
+            const d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
+            alphaChannel[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
+        }
+
+        return alphaChannel;
+    }
 }
 
-TinySDF.prototype.draw = function (char) {
-    this.ctx.clearRect(0, 0, this.size, this.size);
-    this.ctx.fillText(char, this.buffer, this.middle);
-
-    var imgData = this.ctx.getImageData(0, 0, this.size, this.size);
-    var alphaChannel = new Uint8ClampedArray(this.size * this.size);
-
-    for (var i = 0; i < this.size * this.size; i++) {
-        var a = imgData.data[i * 4 + 3] / 255; // alpha value
-        this.gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
-        this.gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
-    }
-
-    edt(this.gridOuter, this.size, this.size, this.f, this.v, this.z);
-    edt(this.gridInner, this.size, this.size, this.f, this.v, this.z);
-
-    for (i = 0; i < this.size * this.size; i++) {
-        var d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
-        alphaChannel[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
-    }
-
-    return alphaChannel;
-};
-
-// 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
+// 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher
+// https://cs.brown.edu/~pff/papers/dt-final.pdf
 function edt(data, width, height, f, v, z) {
-    for (var x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
-    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
+    for (let x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
+    for (let y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
 }
 
 // 1D squared distance transform
 function edt1d(grid, offset, stride, length, f, v, z) {
-    var q, k, s, r;
+    let q, k, s, r;
     v[0] = 0;
     z[0] = -INF;
     z[1] = INF;
