@@ -1,7 +1,14 @@
 const INF = 1e20;
 
 export default class TinySDF {
-    constructor({
+
+    constructor(options = {}) {
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.setOptions(options);
+    }
+
+    setOptions({
         fontSize = 24,
         buffer = 3,
         radius = 8,
@@ -17,10 +24,8 @@ export default class TinySDF {
         this.radius = radius;
         const size = this.size = this.fontSize + this.buffer * 2;
 
-        this.canvas = document.createElement('canvas');
         this.canvas.width = this.canvas.height = size;
 
-        this.ctx = this.canvas.getContext('2d');
         this.ctx.font = `${this.fontWeight} ${this.fontSize}px ${this.fontFamily}`;
         this.ctx.textBaseline = 'middle';
         this.ctx.fillStyle = 'black';
@@ -34,6 +39,7 @@ export default class TinySDF {
 
         // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
         this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
+        return this;
     }
 
     draw(char) {

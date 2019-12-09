@@ -23,6 +23,9 @@ const tinySDFGenerator = new TinySDF({
   fontWeight: 'normal'     // css font-weight
 });
 
-const oneSDF = tinySDFGenerator.draw('泽');
 // returns a Uint8ClampedArray array of alpha values (0–255) for a size x size square grid
+const oneSDF = tinySDFGenerator.draw('泽');
+
+// reset selected options and re-calculate the generator constants
+tinySDFGenerator.setOptions({ fontFamily: 'serif' });
 ```
