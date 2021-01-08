@@ -5,7 +5,7 @@ from system fonts on the browser using Canvas 2D and
 [Felzenszwalb/Huttenlocher distance transform](https://cs.brown.edu/~pff/papers/dt-final.pdf).
 This is very useful for [rendering text with WebGL](https://www.mapbox.com/blog/text-signed-distance-fields/).
 
-This implementation is based directly on the algorithm published in the Felzenszwalb/Huttenlocher paper, and is not a port of the existing C++ implementation provided by the paper's authors. 
+This implementation is based directly on the algorithm published in the Felzenszwalb/Huttenlocher paper, and is not a port of the existing C++ implementation provided by the paper's authors.
 
 Demo: http://mapbox.github.io/tiny-sdf/
 
@@ -24,4 +24,18 @@ var tinySDFGenerator = new TinySDF(fontsize, buffer, radius, cutoff, fontFamily,
 
 var oneSDF = tinySDFGenerator.draw('泽');
 // returns a Uint8ClampedArray array of alpha values (0–255) for a size x size square grid
+
+// To generate glyphs with variable advances (e.g. non-ideographic glyphs),
+// use `drawWithMetrics`
+var sdfWithMetrics = tinySDFGenerator.drawWithMetrics('A');
+// sdfWithMetrics.data is the same as in `draw`, except the size may be clipped to fit the glyph
+// sdfWithMetrics.metrics contains:
+//  top:        Top alignment: glyph ascent - 'top' = baseline
+//  left:       Currently hardwired to 0
+//  width:      Width of rasterized portion of glyph
+//  height
+//  advance:    Layout advance
+//  sdfWidth:   Width of the returned bitmap, usually but not always width + 2 * buffer
+//  sdfHeight  
+//  fontAscent: Maximum ascent of font from baseline
 ```
