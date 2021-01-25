@@ -95,8 +95,10 @@ TinySDF.prototype._draw = function (char, getMetrics) {
 
         // If the glyph overflows the canvas size, it will be clipped at the
         // bottom/right
+        // Math.abs is necessary because characters from an RTL script will be
+        // laid out in the opposite direction
         glyphWidth = Math.min(this.size,
-            Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
+            Math.ceil(Math.abs(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft)));
         glyphHeight = Math.min(this.size - imgTop,
             Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
 
