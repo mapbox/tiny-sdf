@@ -27,6 +27,7 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.ctx = this.canvas.getContext('2d');
     this.ctx.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
     this.ctx.textBaseline = 'middle';
+    this.ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
     this.ctx.fillStyle = 'black';
 
     // temporary arrays for the distance transform
@@ -95,10 +96,8 @@ TinySDF.prototype._draw = function (char, getMetrics) {
 
         // If the glyph overflows the canvas size, it will be clipped at the
         // bottom/right
-        // Math.abs is necessary because characters from an RTL script will be
-        // laid out in the opposite direction
         glyphWidth = Math.min(this.size,
-            Math.ceil(Math.abs(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft)));
+            Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
         glyphHeight = Math.min(this.size - imgTop,
             Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
 
