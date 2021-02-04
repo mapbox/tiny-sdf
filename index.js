@@ -121,17 +121,17 @@ function edt(data, width, height, f, v, z) {
 
 // 1D squared distance transform
 function edt1d(grid, offset, stride, length, f, v, z) {
-    let q, k, s, r;
     v[0] = 0;
     z[0] = -INF;
     z[1] = INF;
+    f[0] = grid[offset];
 
-    for (q = 0; q < length; q++) f[q] = grid[offset + q * stride];
-
-    for (q = 1, k = 0, s = 0; q < length; q++) {
+    for (let q = 1, k = 0, s = 0; q < length; q++) {
+        f[q] = grid[offset + q * stride];
+        const q2 = q * q;
         do {
-            r = v[k];
-            s = (f[q] - f[r] + q * q - r * r) / (q - r) / 2;
+            const r = v[k];
+            s = (f[q] - f[r] + q2 - r * r) / (q - r) / 2;
         } while (s <= z[k] && --k > -1);
 
         k++;
@@ -140,9 +140,10 @@ function edt1d(grid, offset, stride, length, f, v, z) {
         z[k + 1] = INF;
     }
 
-    for (q = 0, k = 0; q < length; q++) {
+    for (let q = 0, k = 0; q < length; q++) {
         while (z[k + 1] < q) k++;
-        r = v[k];
-        grid[offset + q * stride] = f[r] + (q - r) * (q - r);
+        const r = v[k];
+        const qr = q - r;
+        grid[offset + q * stride] = f[r] + qr * qr;
     }
 }
