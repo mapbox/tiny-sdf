@@ -33,9 +33,9 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     // temporary arrays for the distance transform
     this.gridOuter = new Float64Array(gridSize * gridSize);
     this.gridInner = new Float64Array(gridSize * gridSize);
-    this.f = new Float64Array(size);
-    this.z = new Float64Array(size + 1);
-    this.v = new Uint16Array(size);
+    this.f = new Float64Array(gridSize);
+    this.z = new Float64Array(gridSize + 1);
+    this.v = new Uint16Array(gridSize);
 
     // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
     this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
