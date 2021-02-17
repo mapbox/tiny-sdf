@@ -26,7 +26,8 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
 
     this.ctx = this.canvas.getContext('2d');
     this.ctx.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
-    this.ctx.textBaseline = 'middle';
+
+    this.ctx.textBaseline = 'alphabetic';
     this.ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
     this.ctx.fillStyle = 'black';
 
@@ -37,8 +38,13 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.z = new Float64Array(gridSize + 1);
     this.v = new Uint16Array(gridSize);
 
-    // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
-    this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
+    this.useMetrics = this.ctx.measureText('A').actualBoundingBoxLeft !== undefined;
+    if (!this.useMetrics) {
+        // If we don't have access to metrics, use previous middle-baseline heuristics
+        this.ctx.textBaseline = 'middle';
+        // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
+        this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
+    }
 }
 
 function prepareGrids(imgData, width, height, glyphWidth, glyphHeight, gridOuter, gridInner) {
@@ -84,14 +90,15 @@ TinySDF.prototype._draw = function (char, getMetrics) {
     var doubleBuffer = 2 * this.buffer;
     var width, glyphWidth, height, glyphHeight, top;
 
-    var imgTop, imgLeft;
+    var imgTop, imgLeft, baselinePosition;
     // If the browser supports bounding box metrics, we can generate a smaller
     // SDF. This is a significant performance win.
-    if (getMetrics && textMetrics.actualBoundingBoxLeft !== undefined) {
+    if (getMetrics && this.useMetrics) {
         // The integer/pixel part of the top alignment is encoded in metrics.top
         // The remainder is implicitly encoded in the rasterization
-        top = Math.floor(textMetrics.actualBoundingBoxAscent) - this.middle;
-        imgTop = Math.max(0, this.middle - Math.ceil(textMetrics.actualBoundingBoxAscent));
+        top = Math.floor(textMetrics.actualBoundingBoxAscent);
+        baselinePosition = this.buffer + Math.ceil(textMetrics.actualBoundingBoxAscent);
+        imgTop = this.buffer;
         imgLeft = this.buffer;
 
         // If the glyph overflows the canvas size, it will be clipped at the
@@ -105,15 +112,19 @@ TinySDF.prototype._draw = function (char, getMetrics) {
         height = glyphHeight + doubleBuffer;
     } else {
         width = glyphWidth = this.size;
-        height = glyphHeight = this.size
-        top = 0;
+        height = glyphHeight = this.size;
+        // 19 points is an approximation of the "cap height" ascent from alphabetic
+        // baseline (even though actual drawing is from middle baseline, we can
+        // use the approximation because every glyph fills the em box)
+        top = 19 * this.fontSize / 24;
         imgTop = imgLeft = 0;
+        baselinePosition = this.middle;
     }
 
     var imgData;
     if (glyphWidth && glyphHeight) {
         this.ctx.clearRect(imgLeft, imgTop, glyphWidth, glyphHeight);
-        this.ctx.fillText(char, this.buffer, this.middle);
+        this.ctx.fillText(char, this.buffer, baselinePosition);
         imgData = this.ctx.getImageData(imgLeft, imgTop, glyphWidth, glyphHeight);
     }
 
@@ -135,8 +146,7 @@ TinySDF.prototype._draw = function (char, getMetrics) {
             sdfHeight: height,
             top: top,
             left: 0,
-            advance: advance,
-            fontAscent: textMetrics.fontBoundingBoxAscent
+            advance: advance
         }
     };
 };
