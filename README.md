@@ -30,12 +30,11 @@ var oneSDF = tinySDFGenerator.draw('泽');
 var sdfWithMetrics = tinySDFGenerator.drawWithMetrics('A');
 // sdfWithMetrics.data is the same as in `draw`, except the size may be clipped to fit the glyph
 // sdfWithMetrics.metrics contains:
-//  top:        Top alignment: glyph ascent - 'top' = baseline
-//  left:       Currently hardwired to 0
+//  top:        Maximum ascent of glyph from alphabetic baseline
+//  left:       Currently hardwired to 0 (actual glyph differences are encoded in the rasterization)
 //  width:      Width of rasterized portion of glyph
 //  height
 //  advance:    Layout advance
 //  sdfWidth:   Width of the returned bitmap, usually but not always width + 2 * buffer
-//  sdfHeight  
-//  fontAscent: Maximum ascent of font from baseline
+//  sdfHeight
 ```
