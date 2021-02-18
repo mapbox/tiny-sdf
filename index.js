@@ -1,8 +1,6 @@
-'use strict';
-
 const INF = 1e20;
 
-class TinySDF {
+export default class TinySDF {
     constructor({
         fontSize = 24,
         buffer = 3,
@@ -142,6 +140,3 @@ function edt1d(grid, offset, stride, length, f, v, z) {
         grid[offset + q * stride] = f[r] + (q - r) * (q - r);
     }
 }
-
-module.exports = TinySDF;
-module.exports.default = TinySDF;

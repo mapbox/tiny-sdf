@@ -2,7 +2,9 @@
   "name": "@mapbox/tiny-sdf",
   "version": "1.2.5",
   "description": "Browser-side SDF font generator",
+  "type": "module",
   "main": "index.js",
+  "exports": "./index.js",
   "scripts": {
     "test": "eslint index.js"
   },
