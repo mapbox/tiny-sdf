@@ -37,7 +37,7 @@ class TinySDF {
         this.v = new Uint16Array(gridSize);
     }
 
-    draw(char) {
+    getMetrics(char) {
         const {
             width: advance,
             actualBoundingBoxAscent,
@@ -49,12 +49,24 @@ class TinySDF {
         // The integer/pixel part of the top alignment is encoded in metrics.top
         // The remainder is implicitly encoded in the rasterization
         const top = Math.floor(actualBoundingBoxAscent);
-        const baselinePosition = this.buffer + Math.ceil(actualBoundingBoxAscent);
         const left = 0;
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
         const width = Math.min(this.size, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft));
         const height = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxAscent + actualBoundingBoxDescent));
+
+        const sdfWidth = width + 2 * this.buffer;
+        const sdfHeight = height + 2 * this.buffer;
+
+        return {width, height, sdfWidth, sdfHeight, top, left, advance};
+    }
+
+    draw(char, metrics = this.getMetrics(char)) {
+        const {width, height, sdfWidth, sdfHeight, top} = metrics;
+
+        // The integer/pixel part of the top alignment is encoded in metrics.top
+        // The remainder is implicitly encoded in the rasterization
+        const baselinePosition = this.buffer + top + 1;
 
         let imgData;
         if (width && height) {
@@ -62,9 +74,6 @@ class TinySDF {
             this.ctx.fillText(char, this.buffer, baselinePosition);
             imgData = this.ctx.getImageData(this.buffer, this.buffer, width, height);
         }
-
-        const sdfWidth = width + 2 * this.buffer;
-        const sdfHeight = height + 2 * this.buffer;
 
         const data = new Uint8ClampedArray(sdfWidth * sdfHeight);
 
@@ -91,7 +100,7 @@ class TinySDF {
             data[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
         }
 
-        return {data, metrics: {width, height, sdfWidth, sdfHeight, top, left, advance}};
+        return {data, metrics};
     }
 }
 
