@@ -3,31 +3,36 @@
 const INF = 1e20;
 
 class TinySDF {
-    constructor(fontSize = 24, buffer = 3, radius = 8, cutoff = 0.25, fontFamily = 'sans-serif', fontWeight = 'normal') {
-        this.fontSize = fontSize;
+    constructor({
+        fontSize = 24,
+        buffer = 3,
+        radius = 8,
+        cutoff = 0.25,
+        fontFamily = 'sans-serif',
+        fontWeight = 'normal'
+    }) {
         this.buffer = buffer;
         this.cutoff = cutoff;
-        this.fontFamily = fontFamily;
-        this.fontWeight = fontWeight;
         this.radius = radius;
 
         // For backwards compatibility, we honor the implicit contract that the
-        // size of the returned bitmap will be fontSize + buffer * 2
+        // size of the returned bitmap will be fontSize + buffer * 2 at max
         const size = this.size = fontSize + buffer * 2;
+
         // Glyphs may be slightly larger than their fontSize. The canvas already
         // has buffer space, but create extra buffer space in the output grid for the
-        // "halo" to extend into (if metric extraction is enabled)
+        // "halo" to extend into
         const gridSize = size + buffer * 2;
 
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = this.canvas.height = size;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
 
-        this.ctx = this.canvas.getContext('2d');
-        this.ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        const ctx = this.ctx = canvas.getContext('2d');
+        ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
-        this.ctx.textBaseline = 'alphabetic';
-        this.ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
-        this.ctx.fillStyle = 'black';
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
+        ctx.fillStyle = 'black';
 
         // temporary arrays for the distance transform
         this.gridOuter = new Float64Array(gridSize * gridSize);
