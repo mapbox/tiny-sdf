@@ -44,7 +44,7 @@ function prepareGrids(imgData, width, height, glyphWidth, glyphHeight, gridOuter
     gridOuter.fill(INF, 0, width * height);
     gridInner.fill(0, 0, width * height);
 
-    var offset = (width - glyphWidth) / 2;
+    const offset = (width - glyphWidth) >> 1;
 
     for (var y = 0; y < glyphHeight; y++) {
         for (var x = 0; x < glyphWidth; x++) {
