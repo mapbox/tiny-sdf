@@ -99,7 +99,7 @@ function updateSDF() {
     var fontWeight = +getEl('fontweight').value;
     var buffer = fontSize / 8;
     var radius = fontSize / 3;
-    var sdf = new TinySDF(fontSize, buffer, radius, null, null, fontWeight);
+    var sdf = new TinySDF(fontSize, buffer, radius, undefined, undefined, fontWeight);
 
     var now = performance.now();
     for (var y = 0, i = 0; y + sdf.size <= canvas.height && i < chars.length; y += sdf.size) {
