@@ -27,7 +27,6 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.ctx = this.canvas.getContext('2d');
     this.ctx.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
 
-    this.ctx.textBaseline = 'alphabetic';
     this.ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
     this.ctx.fillStyle = 'black';
 
@@ -39,12 +38,9 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.v = new Uint16Array(gridSize);
 
     this.useMetrics = this.ctx.measureText('A').actualBoundingBoxLeft !== undefined;
-    if (!this.useMetrics) {
-        // If we don't have access to metrics, use previous middle-baseline heuristics
-        this.ctx.textBaseline = 'middle';
-        // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
-        this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
-    }
+
+    // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
+    this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
 }
 
 function prepareGrids(imgData, width, height, glyphWidth, glyphHeight, gridOuter, gridInner) {
@@ -110,6 +106,7 @@ TinySDF.prototype._draw = function (char, getMetrics) {
 
         width = glyphWidth + doubleBuffer;
         height = glyphHeight + doubleBuffer;
+        this.ctx.textBaseline = 'alphabetic';
     } else {
         width = glyphWidth = this.size;
         height = glyphHeight = this.size;
@@ -119,6 +116,7 @@ TinySDF.prototype._draw = function (char, getMetrics) {
         top = 19 * this.fontSize / 24;
         imgTop = imgLeft = 0;
         baselinePosition = this.middle;
+        this.ctx.textBaseline = 'middle';
     }
 
     var imgData;
