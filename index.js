@@ -22,8 +22,7 @@ export default class TinySDF {
         // "halo" to extend into
         const gridSize = size + buffer * 2;
 
-        const canvas = document.createElement('canvas');
-        canvas.width = canvas.height = size;
+        const canvas = this._createCanvas(size);
 
         const ctx = this.ctx = canvas.getContext('2d');
         ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
@@ -38,6 +37,12 @@ export default class TinySDF {
         this.f = new Float64Array(gridSize);
         this.z = new Float64Array(gridSize + 1);
         this.v = new Uint16Array(gridSize);
+    }
+
+    _createCanvas(size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        return canvas;
     }
 
     getMetrics(char) {

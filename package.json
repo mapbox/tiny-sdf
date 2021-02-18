@@ -6,7 +6,8 @@
   "main": "index.js",
   "exports": "./index.js",
   "scripts": {
-    "test": "eslint index.js"
+    "pretest": "eslint index.js test",
+    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",
@@ -27,10 +28,17 @@
   },
   "homepage": "https://github.com/mapbox/tiny-sdf#readme",
   "devDependencies": {
+    "canvas": "^2.6.1",
     "eslint": "^7.20.0",
-    "eslint-config-mourner": "^3.0.0"
+    "eslint-config-mourner": "^3.0.0",
+    "pixelmatch": "^5.2.1",
+    "pngjs": "^6.0.0",
+    "tape": "^5.1.1"
   },
   "eslintConfig": {
-    "extends": "mourner"
+    "extends": "mourner",
+    "parserOptions": {
+      "ecmaVersion": 2020
+    }
   }
 }
