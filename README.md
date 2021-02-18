@@ -10,31 +10,30 @@ This implementation is based directly on the algorithm published in the Felzensz
 Demo: http://mapbox.github.io/tiny-sdf/
 
 ## Usage
+
 Create a TinySDF for drawing SDFs based on font parameters:
 
 ```js
-var fontsize = 24; // Font size in pixels
-var buffer = 3;    // Whitespace buffer around a glyph in pixels
-var radius = 8;    // How many pixels around the glyph shape to use for encoding distance
-var cutoff = 0.25  // How much of the radius (relative) is used for the inside part the glyph
+var tinySdf = new TinySDF({
+    fontSize: 24,             // Font size in pixels
+    fontFamily: 'sans-serif', // CSS font-family
+    fontWeight: 'normal',     // CSS font-weight
+    buffer: 3,                // Whitespace buffer around a glyph in pixels
+    radius: 8,                // How many pixels around the glyph shape to use for encoding distance
+    cutoff: 0.25              // How much of the radius (relative) is used for the inside part of the glyph
+});
 
-var fontFamily = 'sans-serif'; // css font-family
-var fontWeight = 'normal';     // css font-weight
-var tinySDFGenerator = new TinySDF(fontsize, buffer, radius, cutoff, fontFamily, fontWeight);
-
-var oneSDF = tinySDFGenerator.draw('泽');
-// returns a Uint8ClampedArray array of alpha values (0–255) for a size x size square grid
-
-// To generate glyphs with variable advances (e.g. non-ideographic glyphs),
-// use `drawWithMetrics`
-var sdfWithMetrics = tinySDFGenerator.drawWithMetrics('A');
-// sdfWithMetrics.data is the same as in `draw`, except the size may be clipped to fit the glyph
-// sdfWithMetrics.metrics contains:
-//  top:        Maximum ascent of glyph from alphabetic baseline
-//  left:       Currently hardwired to 0 (actual glyph differences are encoded in the rasterization)
-//  width:      Width of rasterized portion of glyph
-//  height
-//  advance:    Layout advance
-//  sdfWidth:   Width of the returned bitmap, usually but not always width + 2 * buffer
-//  sdfHeight
+var {data, metrics} = tinySdf.draw('泽');
 ```
+
+`data` is a Uint8ClampedArray array of alpha values (0–255) for a `sdfWidth` x `sdfHeight` grid.
+
+`metrics` is an object with the following properties:
+
+- `top`: Maximum ascent of the glyph from alphabetic baseline.
+- `left`: Currently hardwired to 0 (actual glyph differences are encoded in the rasterization).
+- `width`: Width of the rasterized portion of the glyph.
+- `height` Height of the rasterized portion of the glyph.
+- `advance`: Layout advance.
+- `sdfWidth`: Width of the returned bitmap, usually but not always `width + 2 * buffer`.
+- `sdfHeight`: Height of the returned bitmap, usually but not always `height + 2 * buffer`.
