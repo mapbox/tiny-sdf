@@ -3,7 +3,7 @@
 module.exports = TinySDF;
 module.exports.default = TinySDF;
 
-var INF = 1e20;
+const INF = 1e20;
 
 function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.fontSize = fontSize || 24;
@@ -15,17 +15,17 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
 
     // For backwards compatibility, we honor the implicit contract that the
     // size of the returned bitmap will be fontSize + buffer * 2
-    var size = this.size = this.fontSize + this.buffer * 2;
+    const size = this.size = this.fontSize + this.buffer * 2;
     // Glyphs may be slightly larger than their fontSize. The canvas already
     // has buffer space, but create extra buffer space in the output grid for the
     // "halo" to extend into (if metric extraction is enabled)
-    var gridSize = size + this.buffer * 2;
+    const gridSize = size + this.buffer * 2;
 
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.canvas.height = size;
 
     this.ctx = this.canvas.getContext('2d');
-    this.ctx.font = this.fontWeight + ' ' + this.fontSize + 'px ' + this.fontFamily;
+    this.ctx.font = `${this.fontWeight} ${this.fontSize}px ${this.fontFamily}`;
 
     this.ctx.textBaseline = 'alphabetic';
     this.ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
@@ -39,88 +39,72 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.v = new Uint16Array(gridSize);
 }
 
-function prepareGrids(imgData, width, height, glyphWidth, glyphHeight, gridOuter, gridInner) {
-    // Initialize grids outside the glyph range to alpha 0
-    gridOuter.fill(INF, 0, width * height);
-    gridInner.fill(0, 0, width * height);
-
-    const offset = (width - glyphWidth) >> 1;
-
-    for (var y = 0; y < glyphHeight; y++) {
-        for (var x = 0; x < glyphWidth; x++) {
-            var j = (y + offset) * width + x + offset;
-            var a = imgData.data[4 * (y * glyphWidth + x) + 3] / 255; // alpha value
-            gridOuter[j] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
-            gridInner[j] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
-        }
-    }
-}
-
 TinySDF.prototype.draw = function (char) {
-    var textMetrics = this.ctx.measureText(char);
+    const textMetrics = this.ctx.measureText(char);
     // Older browsers only expose the glyph width
     // This is enough for basic layout with all glyphs using the same fixed size
-    var advance = textMetrics.width;
+    const advance = textMetrics.width;
 
     // The integer/pixel part of the top alignment is encoded in metrics.top
     // The remainder is implicitly encoded in the rasterization
-    var top = Math.floor(textMetrics.actualBoundingBoxAscent);
-    var baselinePosition = this.buffer + Math.ceil(textMetrics.actualBoundingBoxAscent);
-    var imgTop = this.buffer;
-    var imgLeft = this.buffer;
+    const top = Math.floor(textMetrics.actualBoundingBoxAscent);
+    const baselinePosition = this.buffer + Math.ceil(textMetrics.actualBoundingBoxAscent);
+    const imgTop = this.buffer;
+    const imgLeft = this.buffer;
 
-    // If the glyph overflows the canvas size, it will be clipped at the
-    // bottom/right
-    var glyphWidth = Math.min(this.size,
+    // If the glyph overflows the canvas size, it will be clipped at the bottom/right
+    const width = Math.min(this.size,
         Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
-    var glyphHeight = Math.min(this.size - imgTop,
+    const height = Math.min(this.size - imgTop,
         Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
 
-    var width = glyphWidth + 2 * this.buffer;
-    var height = glyphHeight + 2 * this.buffer;
+    const sdfWidth = width + 2 * this.buffer;
+    const sdfHeight = height + 2 * this.buffer;
 
-    var imgData;
-    if (glyphWidth && glyphHeight) {
-        this.ctx.clearRect(imgLeft, imgTop, glyphWidth, glyphHeight);
+    let imgData;
+    if (width && height) {
+        this.ctx.clearRect(imgLeft, imgTop, width, height);
         this.ctx.fillText(char, this.buffer, baselinePosition);
-        imgData = this.ctx.getImageData(imgLeft, imgTop, glyphWidth, glyphHeight);
+        imgData = this.ctx.getImageData(imgLeft, imgTop, width, height);
     }
 
-    var alphaChannel = new Uint8ClampedArray(width * height);
+    const data = new Uint8ClampedArray(sdfWidth * sdfHeight);
 
-    prepareGrids(imgData, width, height, glyphWidth, glyphHeight, this.gridOuter, this.gridInner);
+    // Initialize grids outside the glyph range to alpha 0
+    this.gridOuter.fill(INF, 0, sdfWidth * sdfHeight);
+    this.gridInner.fill(0, 0, sdfWidth * sdfHeight);
 
-    edt(this.gridOuter, width, height, this.f, this.v, this.z);
-    edt(this.gridInner, width, height, this.f, this.v, this.z);
+    const offset = (sdfWidth - width) >> 1;
 
-    for (var i = 0; i < width * height; i++) {
-        var d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
-        alphaChannel[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
-    }
-
-    return {
-        data: alphaChannel,
-        metrics: {
-            width: glyphWidth,
-            height: glyphHeight,
-            sdfWidth: width,
-            sdfHeight: height,
-            top: top,
-            left: 0,
-            advance: advance
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const j = (y + offset) * sdfWidth + x + offset;
+            const a = imgData.data[4 * (y * width + x) + 3] / 255; // alpha value
+            this.gridOuter[j] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
+            this.gridInner[j] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
         }
-    };
+    }
+
+    edt(this.gridOuter, sdfWidth, sdfHeight, this.f, this.v, this.z);
+    edt(this.gridInner, sdfWidth, sdfHeight, this.f, this.v, this.z);
+
+    for (let i = 0; i < sdfWidth * sdfHeight; i++) {
+        const d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
+        data[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
+    }
+
+    return {data, metrics: {width, height, sdfWidth, sdfHeight, top, left: 0, advance}};
 };
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
 function edt(data, width, height, f, v, z) {
-    for (var x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
-    for (var y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
+    for (let x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
+    for (let y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
 }
 
 // 1D squared distance transform
 function edt1d(grid, offset, stride, length, f, v, z) {
-    var q, k, s, r;
+    let q, k, s, r;
     v[0] = 0;
     z[0] = -INF;
     z[1] = INF;
