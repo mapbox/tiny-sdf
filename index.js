@@ -73,54 +73,56 @@ function extractAlpha(alphaChannel, width, height, gridOuter, gridInner, radius,
     }
 }
 
-TinySDF.prototype.draw = function (char) {
+TinySDF.prototype.getMetrics = function (char) {
     var textMetrics = this.ctx.measureText(char);
-    var advance = textMetrics.width;
+    // If the glyph overflows the canvas size, it will be clipped at the
+    // bottom/right
+    var glyphWidth = Math.min(this.size - this.buffer,
+        Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
+    var glyphHeight = Math.min(this.size - this.buffer,
+        Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
+
+    return {
+        width: glyphWidth,
+        height: glyphHeight,
+        sdfWidth: glyphWidth + 2 * this.buffer,
+        sdfHeight: glyphWidth + 2 * this.buffer,
+        top: Math.floor(textMetrics.actualBoundingBoxAscent);,
+        left: 0,
+        advance: textMetrics.width
+    }
+}
+
+TinySDF.prototype.draw = function (char, metrics) {
+    if (!metrics) {
+        metrics = this.getMetrics(char);
+    }
+
+    const { width, height, sdfWidth, sdfHeight, top } = metrics;
 
     // The integer/pixel part of the top alignment is encoded in metrics.top
     // The remainder is implicitly encoded in the rasterization
-    var top = Math.floor(textMetrics.actualBoundingBoxAscent);
-    var baselinePosition = this.buffer + Math.ceil(textMetrics.actualBoundingBoxAscent);
-    var imgTop = this.buffer;
-    var imgLeft = this.buffer;
-
-    // If the glyph overflows the canvas size, it will be clipped at the
-    // bottom/right
-    var glyphWidth = Math.min(this.size,
-        Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
-    var glyphHeight = Math.min(this.size - imgTop,
-        Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
-
-    var width = glyphWidth + 2 * this.buffer;
-    var height = glyphHeight + 2 * this.buffer;
+    var baselinePosition = this.buffer + top + 1;
 
     var imgData;
-    if (glyphWidth && glyphHeight) {
-        this.ctx.clearRect(imgLeft, imgTop, glyphWidth, glyphHeight);
+    if (width && height) {
+        this.ctx.clearRect(this.buffer, this.buffer, width, height);
         this.ctx.fillText(char, this.buffer, baselinePosition);
-        imgData = this.ctx.getImageData(imgLeft, imgTop, glyphWidth, glyphHeight);
+        imgData = this.ctx.getImageData(this.buffer, this.buffer, width, height);
     }
 
-    var alphaChannel = new Uint8ClampedArray(width * height);
+    var alphaChannel = new Uint8ClampedArray(sdfWidth * sdfHeight);
 
-    prepareGrids(imgData, width, height, glyphWidth, glyphHeight, this.gridOuter, this.gridInner);
+    prepareGrids(imgData, width, height, width, height, this.gridOuter, this.gridInner);
 
-    edt(this.gridOuter, width, height, this.f, this.v, this.z);
-    edt(this.gridInner, width, height, this.f, this.v, this.z);
+    edt(this.gridOuter, sdfWidth, sdfHeight, this.f, this.v, this.z);
+    edt(this.gridInner, sdfWidth, sdfHeight, this.f, this.v, this.z);
 
-    extractAlpha(alphaChannel, width, height, this.gridOuter, this.gridInner, this.radius, this.cutoff);
+    extractAlpha(alphaChannel, sdfWidth, sdfHeight, this.gridOuter, this.gridInner, this.radius, this.cutoff);
 
     return {
         data: alphaChannel,
-        metrics: {
-            width: glyphWidth,
-            height: glyphHeight,
-            sdfWidth: width,
-            sdfHeight: height,
-            top: top,
-            left: 0,
-            advance: advance
-        }
+        metrics
     };
 };
 
