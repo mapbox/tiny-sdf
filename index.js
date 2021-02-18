@@ -37,14 +37,6 @@ function TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight) {
     this.f = new Float64Array(gridSize);
     this.z = new Float64Array(gridSize + 1);
     this.v = new Uint16Array(gridSize);
-
-    this.useMetrics = this.ctx.measureText('A').actualBoundingBoxLeft !== undefined;
-    if (!this.useMetrics) {
-        // If we don't have access to metrics, use previous middle-baseline heuristics
-        this.ctx.textBaseline = 'middle';
-        // hack around https://bugzilla.mozilla.org/show_bug.cgi?id=737852
-        this.middle = Math.round((size / 2) * (navigator.userAgent.indexOf('Gecko/') >= 0 ? 1.2 : 1));
-    }
 }
 
 function prepareGrids(imgData, width, height, glyphWidth, glyphHeight, gridOuter, gridInner) {
@@ -81,45 +73,26 @@ function extractAlpha(alphaChannel, width, height, gridOuter, gridInner, radius,
     }
 }
 
-TinySDF.prototype._draw = function (char, getMetrics) {
+TinySDF.prototype.draw = function (char) {
     var textMetrics = this.ctx.measureText(char);
-    // Older browsers only expose the glyph width
-    // This is enough for basic layout with all glyphs using the same fixed size
     var advance = textMetrics.width;
 
-    var doubleBuffer = 2 * this.buffer;
-    var width, glyphWidth, height, glyphHeight, top;
+    // The integer/pixel part of the top alignment is encoded in metrics.top
+    // The remainder is implicitly encoded in the rasterization
+    var top = Math.floor(textMetrics.actualBoundingBoxAscent);
+    var baselinePosition = this.buffer + Math.ceil(textMetrics.actualBoundingBoxAscent);
+    var imgTop = this.buffer;
+    var imgLeft = this.buffer;
 
-    var imgTop, imgLeft, baselinePosition;
-    // If the browser supports bounding box metrics, we can generate a smaller
-    // SDF. This is a significant performance win.
-    if (getMetrics && this.useMetrics) {
-        // The integer/pixel part of the top alignment is encoded in metrics.top
-        // The remainder is implicitly encoded in the rasterization
-        top = Math.floor(textMetrics.actualBoundingBoxAscent);
-        baselinePosition = this.buffer + Math.ceil(textMetrics.actualBoundingBoxAscent);
-        imgTop = this.buffer;
-        imgLeft = this.buffer;
+    // If the glyph overflows the canvas size, it will be clipped at the
+    // bottom/right
+    var glyphWidth = Math.min(this.size,
+        Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
+    var glyphHeight = Math.min(this.size - imgTop,
+        Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
 
-        // If the glyph overflows the canvas size, it will be clipped at the
-        // bottom/right
-        glyphWidth = Math.min(this.size,
-            Math.ceil(textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft));
-        glyphHeight = Math.min(this.size - imgTop,
-            Math.ceil(textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent));
-
-        width = glyphWidth + doubleBuffer;
-        height = glyphHeight + doubleBuffer;
-    } else {
-        width = glyphWidth = this.size;
-        height = glyphHeight = this.size;
-        // 19 points is an approximation of the "cap height" ascent from alphabetic
-        // baseline (even though actual drawing is from middle baseline, we can
-        // use the approximation because every glyph fills the em box)
-        top = 19 * this.fontSize / 24;
-        imgTop = imgLeft = 0;
-        baselinePosition = this.middle;
-    }
+    var width = glyphWidth + 2 * this.buffer;
+    var height = glyphHeight + 2 * this.buffer;
 
     var imgData;
     if (glyphWidth && glyphHeight) {
@@ -149,14 +122,6 @@ TinySDF.prototype._draw = function (char, getMetrics) {
             advance: advance
         }
     };
-};
-
-TinySDF.prototype.draw = function (char) {
-    return this._draw(char, false).data;
-};
-
-TinySDF.prototype.drawWithMetrics = function (char) {
-    return this._draw(char, true);
 };
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
