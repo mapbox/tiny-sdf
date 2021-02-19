@@ -13,14 +13,9 @@ export default class TinySDF {
         this.cutoff = cutoff;
         this.radius = radius;
 
-        // For backwards compatibility, we honor the implicit contract that the
-        // size of the returned bitmap will be fontSize + buffer * 2 at max
-        const size = this.size = fontSize + buffer * 2;
-
-        // Glyphs may be slightly larger than their fontSize. The canvas already
-        // has buffer space, but create extra buffer space in the output grid for the
-        // "halo" to extend into
-        const gridSize = size + buffer * 2;
+        // make the canvas size big enough to both have the specified buffer around the glyph
+        // for "halo", and account for some glyphs possibly being larger than their font size
+        const size = this.size = fontSize + buffer * 4;
 
         const canvas = this._createCanvas(size);
 
@@ -32,11 +27,11 @@ export default class TinySDF {
         ctx.fillStyle = 'black';
 
         // temporary arrays for the distance transform
-        this.gridOuter = new Float64Array(gridSize * gridSize);
-        this.gridInner = new Float64Array(gridSize * gridSize);
-        this.f = new Float64Array(gridSize);
-        this.z = new Float64Array(gridSize + 1);
-        this.v = new Uint16Array(gridSize);
+        this.gridOuter = new Float64Array(size * size);
+        this.gridInner = new Float64Array(size * size);
+        this.f = new Float64Array(size);
+        this.z = new Float64Array(size + 1);
+        this.v = new Uint16Array(size);
     }
 
     _createCanvas(size) {
@@ -47,68 +42,65 @@ export default class TinySDF {
 
     getMetrics(char) {
         const {
-            width: advance,
+            width: glyphAdvance,
             actualBoundingBoxAscent,
             actualBoundingBoxDescent,
             actualBoundingBoxLeft,
             actualBoundingBoxRight
         } = this.ctx.measureText(char);
 
-        // The integer/pixel part of the top alignment is encoded in metrics.top
+        // The integer/pixel part of the top alignment is encoded in metrics.glyphTop
         // The remainder is implicitly encoded in the rasterization
-        const top = Math.floor(actualBoundingBoxAscent);
-        const left = 0;
+        const glyphTop = Math.floor(actualBoundingBoxAscent);
+        const glyphLeft = 0;
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
-        const width = Math.min(this.size, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft));
-        const height = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxAscent + actualBoundingBoxDescent));
+        const glyphWidth = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft));
+        const glyphHeight = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxAscent + actualBoundingBoxDescent));
 
-        const sdfWidth = width + 2 * this.buffer;
-        const sdfHeight = height + 2 * this.buffer;
+        const width = glyphWidth + 2 * this.buffer;
+        const height = glyphHeight + 2 * this.buffer;
 
-        return {width, height, sdfWidth, sdfHeight, top, left, advance};
+        return {width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
     }
 
     draw(char, metrics = this.getMetrics(char)) {
-        const {width, height, sdfWidth, sdfHeight, top} = metrics;
-
-        // The integer/pixel part of the top alignment is encoded in metrics.top
-        // The remainder is implicitly encoded in the rasterization
-        const baselinePosition = this.buffer + top + 1;
+        const {width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance} = metrics;
 
         let imgData;
-        if (width && height) {
-            this.ctx.clearRect(this.buffer, this.buffer, width, height);
+        if (glyphWidth && glyphHeight) {
+            const baselinePosition = this.buffer + glyphTop + 1;
+            this.ctx.clearRect(this.buffer, this.buffer, glyphWidth, glyphHeight);
             this.ctx.fillText(char, this.buffer, baselinePosition);
-            imgData = this.ctx.getImageData(this.buffer, this.buffer, width, height);
+            imgData = this.ctx.getImageData(this.buffer, this.buffer, glyphWidth, glyphHeight);
         }
 
-        const data = new Uint8ClampedArray(sdfWidth * sdfHeight);
+        const data = new Uint8ClampedArray(width * height);
 
         // Initialize grids outside the glyph range to alpha 0
-        this.gridOuter.fill(INF, 0, sdfWidth * sdfHeight);
-        this.gridInner.fill(0, 0, sdfWidth * sdfHeight);
+        this.gridOuter.fill(INF, 0, width * height);
+        this.gridInner.fill(0, 0, width * height);
 
-        const offset = (sdfWidth - width) >> 1;
+        const offset = (width - glyphWidth) >> 1;
 
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const j = (y + offset) * sdfWidth + x + offset;
-                const a = imgData.data[4 * (y * width + x) + 3] / 255; // alpha value
+        for (let y = 0; y < glyphHeight; y++) {
+            for (let x = 0; x < glyphWidth; x++) {
+                const j = (y + offset) * width + x + offset;
+                const a = imgData.data[4 * (y * glyphWidth + x) + 3] / 255; // alpha value
                 this.gridOuter[j] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
                 this.gridInner[j] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
             }
         }
 
-        edt(this.gridOuter, sdfWidth, sdfHeight, this.f, this.v, this.z);
-        edt(this.gridInner, sdfWidth, sdfHeight, this.f, this.v, this.z);
+        edt(this.gridOuter, width, height, this.f, this.v, this.z);
+        edt(this.gridInner, width, height, this.f, this.v, this.z);
 
-        for (let i = 0; i < sdfWidth * sdfHeight; i++) {
+        for (let i = 0; i < width * height; i++) {
             const d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
             data[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
         }
 
-        return {data, metrics};
+        return {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
     }
 }
 

@@ -19,23 +19,15 @@ test('draws an SDF given a character', (t) => {
         fontSize: 48
     });
 
-    const {data, metrics} = sdf.draw('材');
+    const {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance} = sdf.draw('材');
 
-    t.same(metrics, {
-        width: 48,
-        height: 44,
-        sdfWidth: 54,
-        sdfHeight: 50,
-        top: 39,
-        left: 0,
-        advance: 48
-    });
-
-    const width = metrics.sdfWidth;
-    const height = metrics.sdfHeight;
-
-    t.equal(fixtureA.width, width);
-    t.equal(fixtureA.height, height);
+    t.equal(width, fixtureA.width, 'width');
+    t.equal(height, fixtureA.height, 'height');
+    t.equal(glyphWidth, 48, 'glyphWidth');
+    t.equal(glyphHeight, 44, 'glyphHeight');
+    t.equal(glyphTop, 39, 'glyphTop');
+    t.equal(glyphLeft, 0, 'glyphLeft');
+    t.equal(glyphAdvance, 48, 'glyphAdvance');
 
     const actualImg = new Uint8Array(data.length * 4);
 
@@ -54,7 +46,7 @@ test('draws an SDF given a character', (t) => {
 
     const numDiffPixels = pixelmatch(fixtureA.data, actualImg, undefined, width, height);
 
-    t.equal(numDiffPixels, 0);
+    t.equal(numDiffPixels, 0, 'SDF pixels');
 
     t.end();
 });

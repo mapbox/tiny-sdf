@@ -14,7 +14,7 @@ Demo: http://mapbox.github.io/tiny-sdf/
 Create a TinySDF for drawing SDFs based on font parameters:
 
 ```js
-var tinySdf = new TinySDF({
+const tinySdf = new TinySDF({
     fontSize: 24,             // Font size in pixels
     fontFamily: 'sans-serif', // CSS font-family
     fontWeight: 'normal',     // CSS font-weight
@@ -23,17 +23,16 @@ var tinySdf = new TinySDF({
     cutoff: 0.25              // How much of the radius (relative) is used for the inside part of the glyph
 });
 
-var {data, metrics} = tinySdf.draw('泽');
+const glyph = tinySdf.draw('泽');
 ```
 
-`data` is a Uint8ClampedArray array of alpha values (0–255) for a `sdfWidth` x `sdfHeight` grid.
+Returns an object with the following properties:
 
-`metrics` is an object with the following properties:
-
-- `top`: Maximum ascent of the glyph from alphabetic baseline.
-- `left`: Currently hardwired to 0 (actual glyph differences are encoded in the rasterization).
-- `width`: Width of the rasterized portion of the glyph.
-- `height` Height of the rasterized portion of the glyph.
-- `advance`: Layout advance.
-- `sdfWidth`: Width of the returned bitmap, usually but not always `width + 2 * buffer`.
-- `sdfHeight`: Height of the returned bitmap, usually but not always `height + 2 * buffer`.
+- `data` is a `Uint8ClampedArray` array of alpha values (0–255) for a `width` x `height` grid.
+- `width`: Width of the returned bitmap.
+- `height`: Height of the returned bitmap.
+- `glyphTop`: Maximum ascent of the glyph from alphabetic baseline.
+- `glyphLeft`: Currently hardwired to 0 (actual glyph differences are encoded in the rasterization).
+- `glyphWidth`: Width of the rasterized portion of the glyph.
+- `glyphHeight` Height of the rasterized portion of the glyph.
+- `glyphAdvance`: Layout advance.

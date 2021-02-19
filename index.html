@@ -105,8 +105,8 @@ function updateSDF() {
     var now = performance.now();
     for (var y = 0, i = 0; y + size <= canvas.height && i < chars.length; y += size) {
         for (var x = 0; x + size <= canvas.width && i < chars.length; x += size) {
-            const {data, metrics} = sdf.draw(chars[i]);
-            ctx.putImageData(makeRGBAImageData(data, metrics.sdfWidth, metrics.sdfHeight), x, y);
+            const {data, width, height} = sdf.draw(chars[i]);
+            ctx.putImageData(makeRGBAImageData(data, width, height), x, y);
             sdfs[chars[i]] = {x: x, y: y};
             i++;
         }
