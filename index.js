@@ -84,10 +84,20 @@ export default class TinySDF {
 
         for (let y = 0; y < glyphHeight; y++) {
             for (let x = 0; x < glyphWidth; x++) {
-                const j = (y + offset) * width + x + offset;
                 const a = imgData.data[4 * (y * glyphWidth + x) + 3] / 255; // alpha value
-                gridOuter[j] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
-                gridInner[j] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
+                if (a === 0) continue; // empty pixels
+
+                const j = (y + offset) * width + x + offset;
+
+                if (a === 1) { // fully drawn pixels
+                    gridOuter[j] = 0;
+                    gridInner[j] = INF;
+
+                } else { // aliased pixels
+                    const d = 0.5 - a;
+                    gridOuter[j] = d > 0 ? d * d : 0;
+                    gridInner[j] = d < 0 ? d * d : 0;
+                }
             }
         }
 

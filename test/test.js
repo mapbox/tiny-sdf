@@ -44,7 +44,7 @@ test('draws an SDF given a character', (t) => {
         writeFileSync(new URL('./glyph.png', import.meta.url), PNG.sync.write(png));
     }
 
-    const numDiffPixels = pixelmatch(fixtureA.data, actualImg, undefined, width, height);
+    const numDiffPixels = pixelmatch(fixtureA.data, actualImg, undefined, width, height, {threshold: 0, includeAA: true});
 
     t.equal(numDiffPixels, 0, 'SDF pixels');
 
