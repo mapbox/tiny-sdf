@@ -67,19 +67,18 @@ export default class TinySDF {
     draw(char, metrics = this.getMetrics(char)) {
         const {width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance} = metrics;
 
-        let imgData;
-        if (glyphWidth && glyphHeight) {
-            const baselinePosition = this.buffer + glyphTop + 1;
-            this.ctx.clearRect(this.buffer, this.buffer, glyphWidth, glyphHeight);
-            this.ctx.fillText(char, this.buffer, baselinePosition);
-            imgData = this.ctx.getImageData(this.buffer, this.buffer, glyphWidth, glyphHeight);
-        }
-
         const data = new Uint8ClampedArray(width * height);
+        const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
+        if (glyphWidth === 0 || glyphHeight === 0) return glyph;
+
+        const {ctx, buffer, gridInner, gridOuter} = this;
+        ctx.clearRect(buffer, buffer, glyphWidth, glyphHeight);
+        ctx.fillText(char, buffer, buffer + glyphTop + 1);
+        const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
 
         // Initialize grids outside the glyph range to alpha 0
-        this.gridOuter.fill(INF, 0, width * height);
-        this.gridInner.fill(0, 0, width * height);
+        gridOuter.fill(INF, 0, width * height);
+        gridInner.fill(0, 0, width * height);
 
         const offset = (width - glyphWidth) >> 1;
 
@@ -87,20 +86,20 @@ export default class TinySDF {
             for (let x = 0; x < glyphWidth; x++) {
                 const j = (y + offset) * width + x + offset;
                 const a = imgData.data[4 * (y * glyphWidth + x) + 3] / 255; // alpha value
-                this.gridOuter[j] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
-                this.gridInner[j] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
+                gridOuter[j] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
+                gridInner[j] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
             }
         }
 
-        edt(this.gridOuter, width, height, this.f, this.v, this.z);
-        edt(this.gridInner, width, height, this.f, this.v, this.z);
+        edt(gridOuter, width, height, this.f, this.v, this.z);
+        edt(gridInner, width, height, this.f, this.v, this.z);
 
         for (let i = 0; i < width * height; i++) {
-            const d = Math.sqrt(this.gridOuter[i]) - Math.sqrt(this.gridInner[i]);
+            const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
             data[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
         }
 
-        return {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
+        return glyph;
     }
 }
 
