@@ -19,6 +19,7 @@ test('draws an SDF given a character', (t) => {
     const rawUrl = new URL('./fixtures/1-raw.png', baseUrl);
     const sdfUrl = new URL('./fixtures/1-sdf.png', baseUrl);
     const metricsUrl = new URL('./fixtures/1-metrics.json', baseUrl);
+    const outMetricsUrl = new URL('./fixtures/1-out.json', baseUrl);
 
     const sdf = new MockTinySDF({
         fontSize: 48,
@@ -49,15 +50,14 @@ test('draws an SDF given a character', (t) => {
         this.putImageData(nodeCanvas.createImageData(new Uint8ClampedArray(png.data.buffer), png.width), 0, 0);
     };
 
-    const {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance} = sdf.draw('材');
+    const {data, ...metrics} = sdf.draw('材');
 
-    t.equal(width, 54, 'width');
-    t.equal(height, 50, 'height');
-    t.equal(glyphWidth, 48, 'glyphWidth');
-    t.equal(glyphHeight, 44, 'glyphHeight');
-    t.equal(glyphTop, 39, 'glyphTop');
-    t.equal(glyphLeft, 0, 'glyphLeft');
-    t.equal(glyphAdvance, 48, 'glyphAdvance');
+    if (process.env.UPDATE) {
+        writeFileSync(outMetricsUrl, JSON.stringify(metrics, null, 2));
+    }
+    const expectedMetrics = JSON.parse(readFileSync(outMetricsUrl));
+
+    t.same(metrics, expectedMetrics, 'metrics');
 
     const actualImg = new Uint8Array(data.length * 4);
 
@@ -68,14 +68,16 @@ test('draws an SDF given a character', (t) => {
         actualImg[4 * i + 3] = 255;
     }
 
+    const {width, height} = metrics;
+
     if (process.env.UPDATE) {
         const png = new PNG({width, height});
         png.data.set(actualImg);
         writeFileSync(sdfUrl, PNG.sync.write(png));
     }
 
-    const expectedImg = PNG.sync.read(readFileSync(sdfUrl));
-    const numDiffPixels = pixelmatch(expectedImg.data, actualImg, undefined, width, height, {threshold: 0, includeAA: true});
+    const expectedImg = PNG.sync.read(readFileSync(sdfUrl)).data;
+    const numDiffPixels = pixelmatch(expectedImg, actualImg, undefined, width, height, {threshold: 0, includeAA: true});
 
     t.equal(numDiffPixels, 0, 'SDF pixels');
 
