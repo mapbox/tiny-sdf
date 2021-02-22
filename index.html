@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SDF test</title>
+<title>TinySDF demo</title>
 <meta charset="utf8" />
 <style>
 body { font: 14px/1 Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
@@ -31,142 +31,134 @@ a { color: #0af; }
     <canvas id="canvas2" width="1000" height="100"></canvas>
 </div>
 
-<script id="sdf-vertex" type="x-shader/x-vertex">
-attribute vec2 a_pos;
-attribute vec2 a_texcoord;
-
-uniform mat4 u_matrix;
-uniform vec2 u_texsize;
-
-varying vec2 v_texcoord;
-
-void main() {
-    gl_Position = u_matrix * vec4(a_pos.xy, 0, 1);
-    v_texcoord = a_texcoord / u_texsize;
-}
-</script>
-
-<script id="sdf-fragment" type="x-shader/x-fragment">
-precision mediump float;
-
-uniform sampler2D u_texture;
-uniform vec4 u_color;
-uniform float u_buffer;
-uniform float u_gamma;
-
-varying vec2 v_texcoord;
-
-void main() {
-    float dist = texture2D(u_texture, v_texcoord).r;
-    float alpha = smoothstep(u_buffer - u_gamma, u_buffer + u_gamma, dist);
-    gl_FragColor = vec4(u_color.rgb, alpha * u_color.a);
-}
-</script>
-
 <script type="module">
 
-import {mat4} from 'https://cdn.skypack.dev/gl-matrix';
+import {mat4} from 'https://cdn.skypack.dev/pin/gl-matrix@v3.3.0-QDHIgv9E54Kj6suUMV0n/mode=imports,min/optimized/gl-matrix.js';
 import TinySDF from './index.js';
 
-var chars = '泽材灭逐莫笔亡鲜词圣择寻厂睡博勒烟授诺伦岸奥唐卖俄炸载洛健堂旁宫喝借君禁阴园谋宋避抓荣姑孙逃牙束跳顶玉镇雪午练迫爷篇肉嘴馆遍凡础洞卷坦牛宁纸诸训私庄祖丝翻暴森塔默握戏隐熟骨访弱蒙歌店鬼软典欲萨伙遭盘爸扩盖弄雄稳忘亿刺拥徒姆杨齐赛趣曲刀床迎冰虚玩析窗醒妻透购替塞努休虎扬途侵刑绿兄迅套贸毕唯谷轮库迹尤竞街促延震弃甲伟麻川申缓潜闪售灯针哲络抵朱埃抱鼓植纯夏忍页杰筑折郑贝尊吴秀混臣雅振染盛怒舞圆搞狂措姓残秋培迷诚宽宇猛摆梅毁伸摩盟末乃悲拍丁赵硬麦蒋操耶阻订彩抽赞魔纷沿喊违妹浪汇币丰蓝殊献桌啦瓦莱援译夺汽烧距裁偏符勇触课敬哭懂墙袭召罚侠厅拜巧侧韩冒债曼融惯享戴童犹乘挂奖绍厚纵障讯涉彻刊丈爆乌役描洗玛患妙镜唱烦签仙彼弗症仿倾牌陷鸟轰咱菜闭奋庆撤泪茶疾缘播朗杜奶季丹狗尾仪偷奔珠虫驻孔宜艾桥淡翼恨繁寒伴叹旦愈潮粮缩罢聚径恰挑袋灰捕徐珍幕映裂泰隔启尖忠累炎暂估泛荒偿横拒瑞忆孤鼻闹羊呆厉衡胞零穷舍码赫婆魂灾洪腿胆津俗辩胸晓劲贫仁偶辑邦恢赖圈摸仰润堆碰艇稍迟辆废净凶署壁御奉旋冬矿抬蛋晨伏吹鸡倍糊秦盾杯租骑乏隆诊奴摄丧污渡旗甘耐凭扎抢绪粗肩梁幻菲皆碎宙叔岩荡综爬荷悉蒂返井壮薄悄扫敏碍殖详迪矛霍允幅撒剩凯颗骂赏液番箱贴漫酸郎腰舒眉忧浮辛恋餐吓挺励辞艘键伍峰尺昨黎辈贯侦滑券崇扰宪绕趋慈乔阅汗枝拖墨胁插箭腊粉泥氏彭拔骗凤慧媒佩愤扑龄驱惜豪掩兼跃尸肃帕驶堡届欣惠册储飘桑闲惨洁踪勃宾频仇磨递邪撞拟滚奏巡颜剂绩贡疯坡瞧截燃焦殿伪柳锁逼颇昏劝呈搜勤戒驾漂饮曹朵仔柔俩孟腐幼践籍牧凉牲佳娜浓芳稿竹腹跌逻垂遵脉貌柏狱猜怜惑陶兽帐饰贷昌叙躺钢沟寄扶铺邓寿惧询汤盗肥尝匆辉奈扣廷澳嘛董迁凝慰厌脏腾幽怨鞋丢埋泉涌辖躲晋紫艰魏吾慌祝邮吐狠鉴曰械咬邻赤挤弯椅陪割揭韦悟聪雾锋梯猫祥阔誉筹丛牵鸣沈阁穆屈旨袖猎臂蛇贺柱抛鼠瑟戈牢逊迈欺吨琴衰瓶恼燕仲诱狼池疼卢仗冠粒遥吕玄尘冯抚浅敦纠钻晶岂峡苍喷耗凌敲菌赔涂粹扁亏寂煤熊恭湿循暖糖赋抑秩帽哀宿踏烂袁侯抖夹昆肝擦猪炼恒慎搬纽纹玻渔磁铜齿跨押怖漠疲叛遣兹祭醉拳弥斜档稀捷肤疫肿豆削岗晃吞宏癌肚隶履涨耀扭坛拨沃绘伐堪仆郭牺歼墓雇廉契拼惩捉覆刷劫嫌瓜歇雕闷乳串娃缴唤赢莲霸桃妥瘦搭赴岳嘉舱俊址庞耕锐缝悔邀玲惟斥宅添挖呵讼氧浩羽斤酷掠妖祸侍乙妨贪挣汪尿莉悬唇翰仓轨枚盐览傅帅庙芬屏寺胖璃愚滴疏萧姿颤丑劣柯寸扔盯辱匹俱辨饿蜂哦腔郁溃谨糟葛苗肠忌溜鸿爵鹏鹰笼丘桂滋聊挡纲肌茨壳痕碗穴膀卓贤卧膜毅锦欠哩函';
+const chars = '泽材灭逐莫笔亡鲜词圣择寻厂睡博勒烟授诺伦岸奥唐卖俄炸载洛健堂旁宫喝借君禁阴园谋宋避抓荣姑孙逃牙束跳顶玉镇雪午练迫爷篇肉嘴馆遍凡础洞卷坦牛宁纸诸训私庄祖丝翻暴森塔默握戏隐熟骨访弱蒙歌店鬼软典欲萨伙遭盘爸扩盖弄雄稳忘亿刺拥徒姆杨齐赛趣曲刀床迎冰虚玩析窗醒妻透购替塞努休虎扬途侵刑绿兄迅套贸毕唯谷轮库迹尤竞街促延震弃甲伟麻川申缓潜闪售灯针哲络抵朱埃抱鼓植纯夏忍页杰筑折郑贝尊吴秀混臣雅振染盛怒舞圆搞狂措姓残秋培迷诚宽宇猛摆梅毁伸摩盟末乃悲拍丁赵硬麦蒋操耶阻订彩抽赞魔纷沿喊违妹浪汇币丰蓝殊献桌啦瓦莱援译夺汽烧距裁偏符勇触课敬哭懂墙袭召罚侠厅拜巧侧韩冒债曼融惯享戴童犹乘挂奖绍厚纵障讯涉彻刊丈爆乌役描洗玛患妙镜唱烦签仙彼弗症仿倾牌陷鸟轰咱菜闭奋庆撤泪茶疾缘播朗杜奶季丹狗尾仪偷奔珠虫驻孔宜艾桥淡翼恨繁寒伴叹旦愈潮粮缩罢聚径恰挑袋灰捕徐珍幕映裂泰隔启尖忠累炎暂估泛荒偿横拒瑞忆孤鼻闹羊呆厉衡胞零穷舍码赫婆魂灾洪腿胆津俗辩胸晓劲贫仁偶辑邦恢赖圈摸仰润堆碰艇稍迟辆废净凶署壁御奉旋冬矿抬蛋晨伏吹鸡倍糊秦盾杯租骑乏隆诊奴摄丧污渡旗甘耐凭扎抢绪粗肩梁幻菲皆碎宙叔岩荡综爬荷悉蒂返井壮薄悄扫敏碍殖详迪矛霍允幅撒剩凯颗骂赏液番箱贴漫酸郎腰舒眉忧浮辛恋餐吓挺励辞艘键伍峰尺昨黎辈贯侦滑券崇扰宪绕趋慈乔阅汗枝拖墨胁插箭腊粉泥氏彭拔骗凤慧媒佩愤扑龄驱惜豪掩兼跃尸肃帕驶堡届欣惠册储飘桑闲惨洁踪勃宾频仇磨递邪撞拟滚奏巡颜剂绩贡疯坡瞧截燃焦殿伪柳锁逼颇昏劝呈搜勤戒驾漂饮曹朵仔柔俩孟腐幼践籍牧凉牲佳娜浓芳稿竹腹跌逻垂遵脉貌柏狱猜怜惑陶兽帐饰贷昌叙躺钢沟寄扶铺邓寿惧询汤盗肥尝匆辉奈扣廷澳嘛董迁凝慰厌脏腾幽怨鞋丢埋泉涌辖躲晋紫艰魏吾慌祝邮吐狠鉴曰械咬邻赤挤弯椅陪割揭韦悟聪雾锋梯猫祥阔誉筹丛牵鸣沈阁穆屈旨袖猎臂蛇贺柱抛鼠瑟戈牢逊迈欺吨琴衰瓶恼燕仲诱狼池疼卢仗冠粒遥吕玄尘冯抚浅敦纠钻晶岂峡苍喷耗凌敲菌赔涂粹扁亏寂煤熊恭湿循暖糖赋抑秩帽哀宿踏烂袁侯抖夹昆肝擦猪炼恒慎搬纽纹玻渔磁铜齿跨押怖漠疲叛遣兹祭醉拳弥斜档稀捷肤疫肿豆削岗晃吞宏癌肚隶履涨耀扭坛拨沃绘伐堪仆郭牺歼墓雇廉契拼惩捉覆刷劫嫌瓜歇雕闷乳串娃缴唤赢莲霸桃妥瘦搭赴岳嘉舱俊址庞耕锐缝悔邀玲惟斥宅添挖呵讼氧浩羽斤酷掠妖祸侍乙妨贪挣汪尿莉悬唇翰仓轨枚盐览傅帅庙芬屏寺胖璃愚滴疏萧姿颤丑劣柯寸扔盯辱匹俱辨饿蜂哦腔郁溃谨糟葛苗肠忌溜鸿爵鹏鹰笼丘桂滋聊挡纲肌茨壳痕碗穴膀卓贤卧膜毅锦欠哩函';
 
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 
-var sdfs = {};
+const sdfs = {};
 
-function getEl(id) {
-    return document.getElementById(id);
-}
-
-// Convert alpha-only to RGBA so we can use convenient
-// `putImageData` for building the composite bitmap
+// Convert alpha-only to RGBA so we can use `putImageData` for building the composite bitmap
 function makeRGBAImageData(alphaChannel, width, height) {
-    var imageData = ctx.createImageData(width, height);
-    var data = imageData.data;
-    for (var i = 0; i < alphaChannel.length; i++) {
-        data[4 * i + 0] = alphaChannel[i];
-        data[4 * i + 1] = alphaChannel[i];
-        data[4 * i + 2] = alphaChannel[i];
-        data[4 * i + 3] = 255;
+    const imageData = ctx.createImageData(width, height);
+    for (let i = 0; i < alphaChannel.length; i++) {
+        imageData.data[4 * i + 0] = alphaChannel[i];
+        imageData.data[4 * i + 1] = alphaChannel[i];
+        imageData.data[4 * i + 2] = alphaChannel[i];
+        imageData.data[4 * i + 3] = 255;
     }
     return imageData;
 }
 
 function updateSDF() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    var fontSize = +getEl('fontsize').value;
-    var fontWeight = +getEl('fontweight').value;
-    var buffer = fontSize / 8;
-    var radius = fontSize / 3;
-    var sdf = new TinySDF({fontSize, buffer, radius, fontWeight});
+    const fontSize = +document.getElementById('fontsize').value;
+    const fontWeight = +document.getElementById('fontweight').value;
+    const buffer = fontSize / 8;
+    const radius = fontSize / 3;
+    const sdf = new TinySDF({fontSize, buffer, radius, fontWeight});
     const size = fontSize + buffer * 2;
 
-    var now = performance.now();
-    for (var y = 0, i = 0; y + size <= canvas.height && i < chars.length; y += size) {
-        for (var x = 0; x + size <= canvas.width && i < chars.length; x += size) {
+    const now = performance.now();
+    let i = 0;
+    for (let y = 0; y + size <= canvas.height && i < chars.length; y += size) {
+        for (let x = 0; x + size <= canvas.width && i < chars.length; x += size) {
             const {data, width, height} = sdf.draw(chars[i]);
             ctx.putImageData(makeRGBAImageData(data, width, height), x, y);
-            sdfs[chars[i]] = {x: x, y: y};
+            sdfs[chars[i]] = {x, y};
             i++;
         }
     }
-    getEl('log').innerHTML = i + ' characters (' + fontSize + 'px, font-weight: ' + fontWeight + ' with ' + buffer + 'px buffer) rendered in ' + Math.round(performance.now() - now) + 'ms.';
+    document.getElementById('log').innerHTML = `${i} characters (${fontSize}px, font-weight: ${fontWeight} with ${buffer}px buffer) rendered in ${Math.round(performance.now() - now)}ms.`;
 }
 
-var canvas2 = document.getElementById('canvas2');
+const canvas2 = document.getElementById('canvas2');
 
-var pixelRatio = window.devicePixelRatio || 1;
-if (pixelRatio > 1) {
-    canvas2.style.width = canvas2.width + 'px';
-    canvas2.width = canvas2.width * pixelRatio;
-    canvas2.style.height = canvas2.height + 'px';
-    canvas2.height = canvas2.height * pixelRatio;
+if (window.devicePixelRatio > 1) {
+    canvas2.style.width = `${canvas2.width}px`;
+    canvas2.style.height = `${canvas2.height}px`;
+    canvas2.width *= 2;
+    canvas2.height *= 2;
 }
 
-var gl = canvas2.getContext("experimental-webgl", { antialias: false });
+const gl = canvas2.getContext('webgl', {antialias: false});
 if (!gl) {
     alert('Failed to initialize WebGL');
 }
 
-var shader = createProgram(gl, getEl('sdf-vertex').innerText, getEl('sdf-fragment').innerText);
+const vertexSource = `
+    attribute vec2 a_pos;
+    attribute vec2 a_texcoord;
+
+    uniform mat4 u_matrix;
+    uniform vec2 u_texsize;
+
+    varying vec2 v_texcoord;
+
+    void main() {
+        gl_Position = u_matrix * vec4(a_pos.xy, 0, 1);
+        v_texcoord = a_texcoord / u_texsize;
+    }`;
+
+const fragmentSource = `
+    precision mediump float;
+
+    uniform sampler2D u_texture;
+    uniform vec4 u_color;
+    uniform float u_buffer;
+    uniform float u_gamma;
+
+    varying vec2 v_texcoord;
+
+    void main() {
+        float dist = texture2D(u_texture, v_texcoord).r;
+        float alpha = smoothstep(u_buffer - u_gamma, u_buffer + u_gamma, dist);
+        gl_FragColor = vec4(u_color.rgb, alpha * u_color.a);
+    }`;
+
+const shader = createProgram(gl, vertexSource, fragmentSource);
 
 gl.useProgram(shader.program);
 gl.enableVertexAttribArray(shader.a_pos);
 gl.enableVertexAttribArray(shader.a_texcoord);
 
-var pMatrix = mat4.create();
+const pMatrix = mat4.create();
 mat4.ortho(pMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0, -1);
 
 gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
 gl.enable(gl.BLEND);
 
-var texture = gl.createTexture();
+const texture = gl.createTexture();
 
-var vertexBuffer = gl.createBuffer();
-var textureBuffer = gl.createBuffer();
+const vertexBuffer = gl.createBuffer();
+const textureBuffer = gl.createBuffer();
 
-var str = "泽材灭逐莫笔亡鲜词圣择寻厂睡博";
+const str = '泽材灭逐莫笔亡鲜词圣择寻厂睡博';
 
 function drawText(size) {
-    var vertexElements = [];
-    var textureElements = [];
+    const vertexElements = [];
+    const textureElements = [];
 
-    var fontsize = +getEl('fontsize').value;
-    var buf = fontsize / 8;
-    var width = fontsize + buf * 2; // glyph width
-    var height = fontsize + buf * 2; // glyph height
-    var bx = 0; // bearing x
-    var by = fontsize / 2 + buf; // bearing y
-    var advance = fontsize; // advance
+    const fontsize = +document.getElementById('fontsize').value;
+    const buf = fontsize / 8;
+    const width = fontsize + buf * 2; // glyph width
+    const height = fontsize + buf * 2; // glyph height
+    const bx = 0; // bearing x
+    const by = fontsize / 2 + buf; // bearing y
+    const advance = fontsize; // advance
 
-    var scale = size / fontsize;
-    var lineWidth = str.length * fontsize * scale;
+    const scale = size / fontsize;
+    const lineWidth = str.length * fontsize * scale;
 
-    var pen = { x: canvas2.width / 2 - lineWidth / 2, y: canvas2.height / 2 };
-    for (var i = 0; i < str.length; i++) {
-        var posX = sdfs[str[i]].x; // pos in sprite x
-        var posY = sdfs[str[i]].y; // pos in sprite y
+    const pen = {x: canvas2.width / 2 - lineWidth / 2, y: canvas2.height / 2};
+    for (let i = 0; i < str.length; i++) {
+        const posX = sdfs[str[i]].x; // pos in sprite x
+        const posY = sdfs[str[i]].y; // pos in sprite y
 
         vertexElements.push(
             pen.x + ((bx - buf) * scale), pen.y - by * scale,
@@ -203,19 +195,19 @@ function drawGL() {
     gl.clearColor(0.8, 0.8, 0.8, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    var scale = +getEl('scale').value * pixelRatio / 2;
-    var buffer = +getEl('halo').value;
-    var angle = +getEl('angle').value;
-    var gamma = +getEl('gamma').value;
+    const scale = +document.getElementById('scale').value * window.devicePixelRatio / 2;
+    const buffer = +document.getElementById('halo').value;
+    const angle = +document.getElementById('angle').value;
+    const gamma = +document.getElementById('gamma').value;
 
     drawText(scale);
 
-    var mvMatrix = mat4.create();
-    mat4.translate(mvMatrix, mvMatrix, [ canvas2.width / 2, canvas2.height / 2, 0 ]);
+    const mvMatrix = mat4.create();
+    mat4.translate(mvMatrix, mvMatrix, [canvas2.width / 2, canvas2.height / 2, 0]);
     mat4.rotateZ(mvMatrix, mvMatrix, angle);
-    mat4.translate(mvMatrix, mvMatrix, [ -canvas2.width / 2, -canvas2.height / 2, 0 ]);
+    mat4.translate(mvMatrix, mvMatrix, [-canvas2.width / 2, -canvas2.height / 2, 0]);
 
-    var mvpMatrix = mat4.create();
+    const mvpMatrix = mat4.create();
     mat4.multiply(mvpMatrix, pMatrix, mvMatrix);
     gl.uniformMatrix4fv(shader.u_matrix, false, mvpMatrix);
 
@@ -229,25 +221,25 @@ function drawGL() {
     gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
     gl.vertexAttribPointer(shader.a_texcoord, 2, gl.FLOAT, false, 0, 0);
 
-    gl.uniform4fv(shader.u_color, [ 1, 1, 1, 1 ]);
+    gl.uniform4fv(shader.u_color, [1, 1, 1, 1]);
     gl.uniform1f(shader.u_buffer, buffer);
     gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numItems);
 
-    gl.uniform4fv(shader.u_color, [ 0, 0, 0, 1 ]);
+    gl.uniform4fv(shader.u_color, [0, 0, 0, 1]);
     gl.uniform1f(shader.u_buffer, 0.75);
     gl.uniform1f(shader.u_gamma, gamma * 1.4142 / scale);
     gl.drawArrays(gl.TRIANGLES, 0, vertexBuffer.numItems);
 }
 
-getEl('fontsize').oninput = frame;
-getEl('fontweight').oninput = frame;
+document.getElementById('fontsize').oninput = frame;
+document.getElementById('fontweight').oninput = frame;
 
-getEl('scale').oninput = drawGL;
-getEl('halo').oninput = drawGL;
-getEl('angle').oninput = drawGL;
-getEl('gamma').oninput = drawGL;
+document.getElementById('scale').oninput = drawGL;
+document.getElementById('halo').oninput = drawGL;
+document.getElementById('angle').oninput = drawGL;
+document.getElementById('gamma').oninput = drawGL;
 
-var frameId;
+let frameId;
 
 function frame() {
     cancelAnimationFrame(frameId);
@@ -257,7 +249,7 @@ function frame() {
 function update() {
     updateSDF();
 
-    var sdfData = new Uint8Array(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
+    const sdfData = new Uint8Array(ctx.getImageData(0, 0, canvas.width, canvas.height).data);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, sdfData);
@@ -274,7 +266,7 @@ function update() {
 update();
 
 function createShader(gl, type, source) {
-    var shader = gl.createShader(type);
+    const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -284,10 +276,10 @@ function createShader(gl, type, source) {
 }
 
 function createProgram(gl, vertexSource, fragmentSource) {
-    var program = gl.createProgram();
+    const program = gl.createProgram();
 
-    var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-    var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
 
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
@@ -297,16 +289,16 @@ function createProgram(gl, vertexSource, fragmentSource) {
         throw new Error(gl.getProgramInfoLog(program));
     }
 
-    var wrapper = {program: program};
+    const wrapper = {program};
 
-    var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    for (var i = 0; i < numAttributes; i++) {
-        var attribute = gl.getActiveAttrib(program, i);
+    const numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    for (let i = 0; i < numAttributes; i++) {
+        const attribute = gl.getActiveAttrib(program, i);
         wrapper[attribute.name] = gl.getAttribLocation(program, attribute.name);
     }
-    var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-    for (var i = 0; i < numUniforms; i++) {
-        var uniform = gl.getActiveUniform(program, i);
+    const numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < numUniforms; i++) {
+        const uniform = gl.getActiveUniform(program, i);
         wrapper[uniform.name] = gl.getUniformLocation(program, uniform.name);
     }
 

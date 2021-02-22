@@ -6,7 +6,7 @@
   "main": "index.js",
   "exports": "./index.js",
   "scripts": {
-    "pretest": "eslint index.js test",
+    "pretest": "eslint index.js index.html test",
     "test": "node test/test.js",
     "start": "st --no-cache --localhost --index index.html ."
   },
@@ -32,6 +32,7 @@
     "canvas": "^2.6.1",
     "eslint": "^7.20.0",
     "eslint-config-mourner": "^3.0.0",
+    "eslint-plugin-html": "^6.1.1",
     "pixelmatch": "^5.2.1",
     "pngjs": "^6.0.0",
     "st": "^2.0.0",
@@ -41,6 +42,9 @@
     "extends": "mourner",
     "parserOptions": {
       "ecmaVersion": 2020
-    }
+    },
+    "plugins": [
+      "html"
+    ]
   }
 }

@@ -18,7 +18,6 @@ export default class TinySDF {
         const size = this.size = fontSize + buffer * 4;
 
         const canvas = this._createCanvas(size);
-
         const ctx = this.ctx = canvas.getContext('2d');
         ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
@@ -65,10 +64,11 @@ export default class TinySDF {
     }
 
     draw(char, metrics = this.getMetrics(char)) {
-        const {width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance} = metrics;
+        const {width, height, glyphWidth, glyphHeight, glyphTop} = metrics;
 
-        const data = new Uint8ClampedArray(width * height);
-        const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
+        const len = width * height;
+        const data = new Uint8ClampedArray(len);
+        const glyph = {data, ...metrics};
         if (glyphWidth === 0 || glyphHeight === 0) return glyph;
 
         const {ctx, buffer, gridInner, gridOuter} = this;
@@ -77,8 +77,8 @@ export default class TinySDF {
         const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
 
         // Initialize grids outside the glyph range to alpha 0
-        gridOuter.fill(INF, 0, width * height);
-        gridInner.fill(0, 0, width * height);
+        gridOuter.fill(INF, 0, len);
+        gridInner.fill(0, 0, len);
 
         const offset = (width - glyphWidth) >> 1;
 
@@ -104,7 +104,7 @@ export default class TinySDF {
         edt(gridOuter, width, height, this.f, this.v, this.z);
         edt(gridInner, width, height, this.f, this.v, this.z);
 
-        for (let i = 0; i < width * height; i++) {
+        for (let i = 0; i < len; i++) {
             const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
             data[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
         }
