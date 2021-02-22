@@ -7,7 +7,8 @@
   "exports": "./index.js",
   "scripts": {
     "pretest": "eslint index.js test",
-    "test": "node test/test.js"
+    "test": "node test/test.js",
+    "start": "st --no-cache --localhost --index index.html ."
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,8 @@
     "eslint-config-mourner": "^3.0.0",
     "pixelmatch": "^5.2.1",
     "pngjs": "^6.0.0",
-    "tape": "^5.1.1"
+    "st": "^2.0.0",
+    "tape": "^5.2.0"
   },
   "eslintConfig": {
     "extends": "mourner",

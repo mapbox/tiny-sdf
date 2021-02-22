@@ -1,17 +1,15 @@
-# TinySDF
+# TinySDF [![Build Status](https://travis-ci.com/mapbox/tiny-sdf.svg?branch=main)](https://travis-ci.com/mapbox/tiny-sdf)
 
 TinySDF is a tiny and fast JavaScript library for generating SDF (signed distance field)
 from system fonts on the browser using Canvas 2D and
 [Felzenszwalb/Huttenlocher distance transform](https://cs.brown.edu/~pff/papers/dt-final.pdf).
 This is very useful for [rendering text with WebGL](https://www.mapbox.com/blog/text-signed-distance-fields/).
 
-This implementation is based directly on the algorithm published in the Felzenszwalb/Huttenlocher paper, and is not a port of the existing C++ implementation provided by the paper's authors.
-
-Demo: http://mapbox.github.io/tiny-sdf/
+## [Demo](http://mapbox.github.io/tiny-sdf)
 
 ## Usage
 
-Create a TinySDF for drawing SDFs based on font parameters:
+Create a TinySDF for drawing glyph SDFs based on font parameters:
 
 ```js
 const tinySdf = new TinySDF({
@@ -23,7 +21,7 @@ const tinySdf = new TinySDF({
     cutoff: 0.25              // How much of the radius (relative) is used for the inside part of the glyph
 });
 
-const glyph = tinySdf.draw('泽');
+const glyph = tinySdf.draw('泽'); // draw a single character
 ```
 
 Returns an object with the following properties:
@@ -36,3 +34,29 @@ Returns an object with the following properties:
 - `glyphWidth`: Width of the rasterized portion of the glyph.
 - `glyphHeight` Height of the rasterized portion of the glyph.
 - `glyphAdvance`: Layout advance.
+
+TinySDF is provided as a ES module, so it's only supported on modern browsers, excluding IE.
+
+```html
+<script type="module">
+import TinySDF from 'https://cdn.skypack.dev/@mapbox/tiny-sdf';
+...
+</script>
+```
+
+In Node, you can't use `require` — only `import` in ESM-capable versions (v12.15+):
+
+```js
+import TinySDF from '@mapbox/tiny-sdf';
+```
+
+## Development
+
+```bash
+npm test  # run tests
+npm start # start server for the demo page
+```
+
+## License
+
+This implementation is licensed under the [BSD 2-Clause license](https://opensource.org/licenses/BSD-2-Clause), and is based directly on the algorithm published in the Felzenszwalb/Huttenlocher paper, and is not a port of the existing C++ implementation provided by the paper's authors.
