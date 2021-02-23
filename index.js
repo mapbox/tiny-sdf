@@ -99,8 +99,9 @@ export default class TinySDF {
             }
         }
 
-        edt(gridOuter, width, height, this.f, this.v, this.z);
-        edt(gridInner, width, height, this.f, this.v, this.z);
+        edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
+        // TODO: where does the -1px error at the top come from?
+        edt(gridInner, buffer, Math.max(buffer - 1, 0), glyphWidth, glyphHeight + 1, width, this.f, this.v, this.z);
 
         for (let i = 0; i < len; i++) {
             const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
@@ -112,9 +113,9 @@ export default class TinySDF {
 }
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
-function edt(data, width, height, f, v, z) {
-    for (let x = 0; x < width; x++) edt1d(data, x, width, height, f, v, z);
-    for (let y = 0; y < height; y++) edt1d(data, y * width, 1, width, f, v, z);
+function edt(data, x0, y0, width, height, gridSize, f, v, z) {
+    for (let x = x0; x < x0 + width; x++) edt1d(data, y0 * gridSize + x, gridSize, height, f, v, z);
+    for (let y = y0; y < y0 + height; y++) edt1d(data, y * gridSize + x0, 1, width, f, v, z);
 }
 
 // 1D squared distance transform
