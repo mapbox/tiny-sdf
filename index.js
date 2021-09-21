@@ -18,7 +18,7 @@ export default class TinySDF {
         const size = this.size = fontSize + buffer * 4;
 
         const canvas = this._createCanvas(size);
-        const ctx = this.ctx = canvas.getContext('2d');
+        const ctx = this.ctx = canvas.getContext('2d', {willReadFrequently: true});
         ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
         ctx.textBaseline = 'alphabetic';
