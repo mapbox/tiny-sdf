@@ -34,12 +34,15 @@ export default class TinySDF {
     }
 
     _createCanvas(size) {
+        if (window.OffscreenCanvas) {
+            return new OffscreenCanvas(size, size);
+        }
         const canvas = document.createElement('canvas');
         canvas.width = canvas.height = size;
         return canvas;
     }
 
-    getMetrics(char) {
+    draw(char) {
         const {
             width: glyphAdvance,
             actualBoundingBoxAscent,
@@ -60,15 +63,9 @@ export default class TinySDF {
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
 
-        return {width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
-    }
-
-    draw(char, metrics = this.getMetrics(char)) {
-        const {width, height, glyphWidth, glyphHeight, glyphTop} = metrics;
-
         const len = width * height;
         const data = new Uint8ClampedArray(len);
-        const glyph = {data, ...metrics};
+        const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
         if (glyphWidth === 0 || glyphHeight === 0) return glyph;
 
         const {ctx, buffer, gridInner, gridOuter} = this;
@@ -100,8 +97,7 @@ export default class TinySDF {
         }
 
         edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
-        // TODO: where does the -1px error at the top come from?
-        edt(gridInner, buffer, Math.max(buffer - 1, 0), glyphWidth, glyphHeight + 1, width, this.f, this.v, this.z);
+        edt(gridInner, buffer, buffer, glyphWidth, glyphHeight, width, this.f, this.v, this.z);
 
         for (let i = 0; i < len; i++) {
             const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);

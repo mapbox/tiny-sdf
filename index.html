@@ -59,8 +59,8 @@ function updateSDF() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const fontSize = +document.getElementById('fontsize').value;
     const fontWeight = +document.getElementById('fontweight').value;
-    const buffer = fontSize / 8;
-    const radius = fontSize / 3;
+    const buffer = Math.ceil(fontSize / 8);
+    const radius = Math.ceil(fontSize / 3);
     const sdf = new TinySDF({fontSize, buffer, radius, fontWeight});
     const size = fontSize + buffer * 2;
 
