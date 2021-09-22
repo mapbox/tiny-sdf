@@ -29,14 +29,14 @@
   },
   "homepage": "https://github.com/mapbox/tiny-sdf#readme",
   "devDependencies": {
-    "canvas": "^2.6.1",
-    "eslint": "^7.20.0",
+    "canvas": "2.6.1",
+    "eslint": "^7.32.0",
     "eslint-config-mourner": "^3.0.0",
-    "eslint-plugin-html": "^6.1.1",
+    "eslint-plugin-html": "^6.2.0",
     "pixelmatch": "^5.2.1",
     "pngjs": "^6.0.0",
-    "st": "^2.0.0",
-    "tape": "^5.2.0"
+    "st": "^3.0.0",
+    "tape": "^5.3.1"
   },
   "eslintConfig": {
     "extends": "mourner",
