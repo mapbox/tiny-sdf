@@ -16,6 +16,7 @@ const tinySdf = new TinySDF({
     fontSize: 24,             // Font size in pixels
     fontFamily: 'sans-serif', // CSS font-family
     fontWeight: 'normal',     // CSS font-weight
+    fontStyle: 'normal',      // CSS font-style
     buffer: 3,                // Whitespace buffer around a glyph in pixels
     radius: 8,                // How many pixels around the glyph shape to use for encoding distance
     cutoff: 0.25              // How much of the radius (relative) is used for the inside part of the glyph
@@ -59,4 +60,4 @@ npm start # start server for the demo page
 
 ## License
 
-This implementation is licensed under the [BSD 2-Clause license](https://opensource.org/licenses/BSD-2-Clause), and is based directly on the algorithm published in the Felzenszwalb/Huttenlocher paper, and is not a port of the existing C++ implementation provided by the paper's authors.
+This implementation is licensed under the [BSD 2-Clause license](https://opensource.org/licenses/BSD-2-Clause). It's based directly on the algorithm published in the Felzenszwalb/Huttenlocher paper, and is not a port of the existing C++ implementation provided by the paper's authors.
