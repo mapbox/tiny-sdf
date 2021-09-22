@@ -7,7 +7,8 @@ export default class TinySDF {
         radius = 8,
         cutoff = 0.25,
         fontFamily = 'sans-serif',
-        fontWeight = 'normal'
+        fontWeight = 'normal',
+        fontStyle = 'normal'
     }) {
         this.buffer = buffer;
         this.cutoff = cutoff;
@@ -19,7 +20,7 @@ export default class TinySDF {
 
         const canvas = this._createCanvas(size);
         const ctx = this.ctx = canvas.getContext('2d', {willReadFrequently: true});
-        ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
 
         ctx.textBaseline = 'alphabetic';
         ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
