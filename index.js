@@ -35,9 +35,6 @@ export default class TinySDF {
     }
 
     _createCanvas(size) {
-        if (typeof OffscreenCanvas !== 'undefined') {
-            return new OffscreenCanvas(size, size);
-        }
         const canvas = document.createElement('canvas');
         canvas.width = canvas.height = size;
         return canvas;
