@@ -29,7 +29,9 @@
     "url": "https://github.com/mapbox/tiny-sdf/issues"
   },
   "homepage": "https://github.com/mapbox/tiny-sdf#readme",
-  "files": [],
+  "files": [
+    "index.d.ts"
+  ],
   "devDependencies": {
     "canvas": "2.8.0",
     "eslint": "^8.0.1",
