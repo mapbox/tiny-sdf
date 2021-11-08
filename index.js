@@ -1,4 +1,5 @@
 const INF = 1e20;
+const MAX_WIDTH = 700;
 
 export default class TinySDF {
     constructor({
@@ -18,26 +19,33 @@ export default class TinySDF {
         // for "halo", and account for some glyphs possibly being larger than their font size
         const size = this.size = fontSize + buffer * 4;
 
-        const canvas = this._createCanvas(size);
-        const ctx = this.ctx = canvas.getContext('2d', {willReadFrequently: true});
-        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+        this._createCanvas(size);
+        this._fontStyle = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
 
-        ctx.textBaseline = 'alphabetic';
-        ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
-        ctx.fillStyle = 'black';
+        this._resetCtx();
 
         // temporary arrays for the distance transform
-        this.gridOuter = new Float64Array(size * size);
-        this.gridInner = new Float64Array(size * size);
-        this.f = new Float64Array(size);
-        this.z = new Float64Array(size + 1);
-        this.v = new Uint16Array(size);
+        this.gridOuter = new Float64Array(size * MAX_WIDTH);
+        this.gridInner = new Float64Array(size * MAX_WIDTH);
+        this.f = new Float64Array(MAX_WIDTH);
+        this.z = new Float64Array(MAX_WIDTH + 1);
+        this.v = new Uint16Array(MAX_WIDTH);
     }
 
     _createCanvas(size) {
-        const canvas = document.createElement('canvas');
-        canvas.width = canvas.height = size;
+        const canvas = this._canvas = document.createElement('canvas');
+        canvas.width = MAX_WIDTH;
+        canvas.height = size;
         return canvas;
+    }
+
+    _resetCtx() {
+        const ctx = this.ctx = this._canvas.getContext('2d', {willReadFrequently: true});
+       
+        ctx.font = this._fontStyle;
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
+        ctx.fillStyle = 'black';
     }
 
     draw(char) {
@@ -55,12 +63,15 @@ export default class TinySDF {
         const glyphLeft = 0;
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
-        const glyphWidth = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft));
-        const glyphHeight = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxAscent) + Math.ceil(actualBoundingBoxDescent));
+        const glyphWidth = Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft);
+        // const glyphWidth = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft));
+
+        const glyphHeight = Math.ceil(actualBoundingBoxAscent + actualBoundingBoxDescent);
+        // const glyphHeight = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxAscent) + Math.ceil(actualBoundingBoxDescent));
 
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
-
+        
         const len = width * height;
         const data = new Uint8ClampedArray(len);
         const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
@@ -71,7 +82,6 @@ export default class TinySDF {
         ctx.fillText(char, buffer, buffer + glyphTop + 1);
         const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
 
-        // Initialize grids outside the glyph range to alpha 0
         gridOuter.fill(INF, 0, len);
         gridInner.fill(0, 0, len);
 
