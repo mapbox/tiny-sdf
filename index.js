@@ -61,7 +61,7 @@ export default class TinySDF {
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
 
-        const len = width * height;
+        const len = Math.max(width * height, 0);
         const data = new Uint8ClampedArray(len);
         const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
         if (glyphWidth === 0 || glyphHeight === 0) return glyph;

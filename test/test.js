@@ -8,13 +8,13 @@ import pixelmatch from 'pixelmatch';
 
 const baseUrl = import.meta.url;
 
-test('draws an SDF given a character', (t) => {
-
-    class MockTinySDF extends TinySDF {
-        _createCanvas(size) {
-            return nodeCanvas.createCanvas(size, size);
-        }
+class MockTinySDF extends TinySDF {
+    _createCanvas(size) {
+        return nodeCanvas.createCanvas(size, size);
     }
+}
+
+test('draws an SDF given a character', (t) => {
 
     const rawUrl = new URL('./fixtures/1-raw.png', baseUrl);
     const sdfUrl = new URL('./fixtures/1-sdf.png', baseUrl);
@@ -84,3 +84,9 @@ test('draws an SDF given a character', (t) => {
     t.end();
 });
 
+test('does not crash on diacritic marks', (t) => {
+    const sdf = new MockTinySDF();
+    sdf.draw('í'[1]);
+    sdf.draw('G̱'[1]);
+    t.end();
+});
