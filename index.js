@@ -9,7 +9,7 @@ export default class TinySDF {
         fontFamily = 'sans-serif',
         fontWeight = 'normal',
         fontStyle = 'normal'
-    }) {
+    } = {}) {
         this.buffer = buffer;
         this.cutoff = cutoff;
         this.radius = radius;
