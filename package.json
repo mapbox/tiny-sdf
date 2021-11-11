@@ -34,7 +34,7 @@
   ],
   "devDependencies": {
     "canvas": "2.8.0",
-    "eslint": "^8.0.1",
+    "eslint": "^8.2.0",
     "eslint-config-mourner": "^3.0.0",
     "eslint-plugin-html": "^6.2.0",
     "pixelmatch": "^5.2.1",
