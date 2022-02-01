@@ -56,7 +56,7 @@ export default class TinySDF {
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
         const glyphWidth = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft));
-        const glyphHeight = Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxAscent) + Math.ceil(actualBoundingBoxDescent));
+        const glyphHeight = Math.min(this.size - this.buffer, glyphTop + Math.ceil(actualBoundingBoxDescent));
 
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
