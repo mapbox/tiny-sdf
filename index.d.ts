@@ -18,6 +18,6 @@ export default class TinySDF {
         glyphHeight: number;
         glyphTop: number;
         glyphLeft: number;
-        glyphAdvance: any;
+        glyphAdvance: number;
     };
 }
