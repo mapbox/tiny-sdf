@@ -1,4 +1,3 @@
-
 import TinySDF from '../index.js';
 import nodeCanvas from 'canvas';
 import {PNG} from 'pngjs';

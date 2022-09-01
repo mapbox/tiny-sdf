@@ -34,13 +34,13 @@
   ],
   "devDependencies": {
     "canvas": "2.9.3",
-    "eslint": "^8.21.0",
+    "eslint": "^8.23.0",
     "eslint-config-mourner": "^3.0.0",
     "eslint-plugin-html": "^7.1.0",
     "pixelmatch": "^5.3.0",
     "pngjs": "^6.0.0",
     "st": "^3.0.0",
-    "tape": "^5.5.3"
+    "tape": "^5.6.0"
   },
   "eslintConfig": {
     "extends": "mourner",
