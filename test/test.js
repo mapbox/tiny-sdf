@@ -89,3 +89,22 @@ test('does not crash on diacritic marks', (t) => {
     sdf.draw('G̱'[1]);
     t.end();
 });
+
+test('does not return negative-width glylphs', (t) => {
+    const sdf = new MockTinySDF();
+    // stub these because they vary across environments
+    sdf.ctx.measureText = () => ({
+        width: 0,
+        actualBoundingBoxLeft: 23.3759765625,
+        actualBoundingBoxRight: -17.6162109375,
+        actualBoundingBoxAscent: 20.2080078125,
+        actualBoundingBoxDescent: -14.51953125,
+        emHeightAscent: 26,
+        emHeightDescent: 9,
+        alphabeticBaseline: 7.51953125
+    });
+    const glyph = sdf.draw('゙');
+    t.equal(glyph.glyphWidth, 0);
+    t.equal(glyph.width, 6); // zero-width glyph with 3px buffer
+    t.end();
+});
