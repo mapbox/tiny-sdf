@@ -33,14 +33,14 @@
     "index.d.ts"
   ],
   "devDependencies": {
-    "canvas": "2.9.3",
-    "eslint": "^8.23.0",
+    "canvas": "2.11.2",
+    "eslint": "^8.56.0",
     "eslint-config-mourner": "^3.0.0",
     "eslint-plugin-html": "^7.1.0",
     "pixelmatch": "^5.3.0",
-    "pngjs": "^6.0.0",
+    "pngjs": "^7.0.0",
     "st": "^3.0.0",
-    "tape": "^5.6.0"
+    "tape": "^5.7.4"
   },
   "eslintConfig": {
     "extends": "mourner",
