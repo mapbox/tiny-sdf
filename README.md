@@ -1,4 +1,4 @@
-# TinySDF [![Build Status](https://travis-ci.com/mapbox/tiny-sdf.svg?branch=main)](https://travis-ci.com/mapbox/tiny-sdf)
+# TinySDF [![Volodymyr Agafonkin's projects](https://img.shields.io/badge/simply-awesome-brightgreen.svg)](https://github.com/mourner/projects)
 
 TinySDF is a tiny and fast JavaScript library for generating SDF (signed distance field)
 from system fonts on the browser using Canvas 2D and
