@@ -2,7 +2,8 @@ import TinySDF from '../index.js';
 import nodeCanvas from 'canvas';
 import {PNG} from 'pngjs';
 import {readFileSync, writeFileSync} from 'fs';
-import {test} from 'tape';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
 import pixelmatch from 'pixelmatch';
 
 const baseUrl = import.meta.url;
@@ -13,7 +14,7 @@ class MockTinySDF extends TinySDF {
     }
 }
 
-test('draws an SDF given a character', (t) => {
+test('draws an SDF given a character', () => {
 
     const rawUrl = new URL('./fixtures/1-raw.png', baseUrl);
     const sdfUrl = new URL('./fixtures/1-sdf.png', baseUrl);
@@ -56,7 +57,7 @@ test('draws an SDF given a character', (t) => {
     }
     const expectedMetrics = JSON.parse(readFileSync(outMetricsUrl));
 
-    t.same(metrics, expectedMetrics, 'metrics');
+    assert.deepEqual(metrics, expectedMetrics, 'metrics');
 
     const actualImg = new Uint8Array(data.length * 4);
 
@@ -78,19 +79,16 @@ test('draws an SDF given a character', (t) => {
     const expectedImg = PNG.sync.read(readFileSync(sdfUrl)).data;
     const numDiffPixels = pixelmatch(expectedImg, actualImg, undefined, width, height, {threshold: 0, includeAA: true});
 
-    t.equal(numDiffPixels, 0, 'SDF pixels');
-
-    t.end();
+    assert.equal(numDiffPixels, 0, 'SDF pixels');
 });
 
-test('does not crash on diacritic marks', (t) => {
+test('does not crash on diacritic marks', () => {
     const sdf = new MockTinySDF();
     sdf.draw('í'[1]);
     sdf.draw('G̱'[1]);
-    t.end();
 });
 
-test('does not return negative-width glylphs', (t) => {
+test('does not return negative-width glylphs', () => {
     const sdf = new MockTinySDF();
     // stub these because they vary across environments
     sdf.ctx.measureText = () => ({
@@ -104,7 +102,6 @@ test('does not return negative-width glylphs', (t) => {
         alphabeticBaseline: 7.51953125
     });
     const glyph = sdf.draw('゙');
-    t.equal(glyph.glyphWidth, 0);
-    t.equal(glyph.width, 6); // zero-width glyph with 3px buffer
-    t.end();
+    assert.equal(glyph.glyphWidth, 0);
+    assert.equal(glyph.width, 6); // zero-width glyph with 3px buffer
 });
