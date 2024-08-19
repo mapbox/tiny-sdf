@@ -160,7 +160,7 @@ function drawText(size) {
     const lineWidth = str.length * fontsize * scale;
 
     const pen = {x: canvas2.width / 2 - lineWidth / 2, y: canvas2.height / 2};
-    for (let codePoint of str) {
+    for (const codePoint of str) {
         const posX = sdfs[codePoint].x; // pos in sprite x
         const posY = sdfs[codePoint].y; // pos in sprite y
 
