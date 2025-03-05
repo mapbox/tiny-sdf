@@ -13,6 +13,7 @@ export default class TinySDF {
         this.buffer = buffer;
         this.cutoff = cutoff;
         this.radius = radius;
+        this.fontSize = fontSize;
 
         // make the canvas size big enough to both have the specified buffer around the glyph
         // for "halo", and account for some glyphs possibly being larger than their font size
@@ -51,12 +52,12 @@ export default class TinySDF {
 
         // The integer/pixel part of the top alignment is encoded in metrics.glyphTop
         // The remainder is implicitly encoded in the rasterization
-        const glyphTop = Math.ceil(actualBoundingBoxAscent);
+        const glyphTop = Math.ceil(actualBoundingBoxAscent) || this.fontSize;
         const glyphLeft = 0;
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
-        const glyphWidth = Math.max(0, Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft)));
-        const glyphHeight = Math.min(this.size - this.buffer, glyphTop + Math.ceil(actualBoundingBoxDescent));
+        const glyphWidth = Math.max(0, Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight - actualBoundingBoxLeft))) || this.size - this.buffer;
+        const glyphHeight = Math.min(this.size - this.buffer, glyphTop + Math.ceil(actualBoundingBoxDescent)) || this.size - this.buffer;
 
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
@@ -64,7 +65,7 @@ export default class TinySDF {
         const len = Math.max(width * height, 0);
         const data = new Uint8ClampedArray(len);
         const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
-        if (glyphWidth === 0 || glyphHeight === 0) return glyph;
+        if (glyphWidth === 0 || isNaN(glyphWidth) || glyphHeight === 0 || isNaN(glyphHeight)) return glyph;
 
         const {ctx, buffer, gridInner, gridOuter} = this;
         ctx.clearRect(buffer, buffer, glyphWidth, glyphHeight);
