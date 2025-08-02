@@ -6,6 +6,7 @@ export declare type TinySDFOptions = {
     fontFamily?: string;
     fontWeight?: string;
     fontStyle?: string;
+    lang?: string;
 };
 
 export default class TinySDF {
