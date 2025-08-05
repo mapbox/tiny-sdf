@@ -8,11 +8,13 @@ export default class TinySDF {
         cutoff = 0.25,
         fontFamily = 'sans-serif',
         fontWeight = 'normal',
-        fontStyle = 'normal'
+        fontStyle = 'normal',
+        lang = null
     } = {}) {
         this.buffer = buffer;
         this.cutoff = cutoff;
         this.radius = radius;
+        this.lang = lang;
 
         // make the canvas size big enough to both have the specified buffer around the glyph
         // for "halo", and account for some glyphs possibly being larger than their font size
@@ -67,6 +69,7 @@ export default class TinySDF {
         if (glyphWidth === 0 || glyphHeight === 0) return glyph;
 
         const {ctx, buffer, gridInner, gridOuter} = this;
+        if (this.lang) ctx.lang = this.lang;
         ctx.clearRect(buffer, buffer, glyphWidth, glyphHeight);
         ctx.fillText(char, buffer, buffer + glyphTop);
         const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
