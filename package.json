@@ -33,7 +33,7 @@
     "index.d.ts"
   ],
   "devDependencies": {
-    "canvas": "3.1.2",
+    "canvas": "^3.2.0",
     "eslint": "^9.32.0",
     "eslint-config-mourner": "^4.1.0",
     "eslint-plugin-html": "^8.1.3",

@@ -106,12 +106,11 @@ test('does not return negative-width glylphs', () => {
     assert.equal(glyph.width, 6); // zero-width glyph with 3px buffer
 });
 
-/*
 test('renders Chinese and Japanese versions of characters', () => {
-    const sdf1 = new MockTinySDF({lang: 'zh'});
+    // assumes Noto Sans CJK SC font is installed
+    const sdf1 = new MockTinySDF({fontFamily: 'Noto Sans CJK SC', lang: 'zh'});
     const glyph1 = sdf1.draw('门');
-    const sdf2 = new MockTinySDF({lang: 'ja'});
+    const sdf2 = new MockTinySDF({fontFamily: 'Noto Sans CJK SC', lang: 'ja'});
     const glyph2 = sdf2.draw('门');
     assert.notDeepStrictEqual(glyph1.data, glyph2.data);
 });
-*/

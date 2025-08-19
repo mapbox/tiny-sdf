@@ -15,5 +15,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Install CJK font
+      run: wget https://github.com/googlefonts/noto-cjk/raw/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf -O /usr/share/fonts/NotoSansCJKsc-Regular.otf && fc-cache -fv
+
     - name: Run tests
       run: npm test
