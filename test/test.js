@@ -107,6 +107,7 @@ test('does not return negative-width glylphs', () => {
 });
 
 test('renders Chinese and Japanese versions of characters', () => {
+    // assumes Noto Sans CJK SC font is installed
     const sdf1 = new MockTinySDF({fontFamily: 'Noto Sans CJK SC', lang: 'zh'});
     const glyph1 = sdf1.draw('门');
     const sdf2 = new MockTinySDF({fontFamily: 'Noto Sans CJK SC', lang: 'ja'});
