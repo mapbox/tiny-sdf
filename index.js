@@ -1,5 +1,13 @@
 const INF = 1e20;
 
+// lookup table for gamma-corrected, signed squared alpha distance values
+const alphaTable = new Float64Array(256);
+for (let i = 0; i < 256; i++) {
+    const d = 0.5 - Math.pow(i / 255, 1 / 2.2);
+    alphaTable[i] = d * Math.abs(d);
+}
+alphaTable[255] = -INF;
+
 export default class TinySDF {
     constructor({
         fontSize = 24,
@@ -78,33 +86,26 @@ export default class TinySDF {
         gridOuter.fill(INF, 0, len);
         gridInner.fill(0, 0, len);
 
+        let imgIdx = 3; // start at the alpha channel of the first pixel
         for (let y = 0; y < glyphHeight; y++) {
-            for (let x = 0; x < glyphWidth; x++) {
-                const a = imgData.data[4 * (y * glyphWidth + x) + 3] / 255; // alpha value
+            let j = (y + buffer) * width + buffer;
+            for (let x = 0; x < glyphWidth; x++, imgIdx += 4, j++) {
+                const a = imgData.data[imgIdx]; // alpha value
                 if (a === 0) continue; // empty pixels
-
-                const j = (y + buffer) * width + x + buffer;
-
-                if (a === 1) { // fully drawn pixels
-                    gridOuter[j] = 0;
-                    gridInner[j] = INF;
-
-                } else { // aliased pixels
-                    // gamma correction
-                    const aLin = Math.pow(a, 1.0 / 2.2);
-                    const d = 0.5 - aLin;
-                    gridOuter[j] = d > 0 ? d * d : 0;
-                    gridInner[j] = d < 0 ? d * d : 0;
-                }
+                const t = alphaTable[a];
+                gridOuter[j] = Math.max(0, t);
+                gridInner[j] = Math.max(0, -t);
             }
         }
 
         edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
         edt(gridInner, buffer, buffer, glyphWidth, glyphHeight, width, this.f, this.v, this.z);
 
+        const scale = 255 / this.radius;
+        const base = 255 * (1 - this.cutoff);
         for (let i = 0; i < len; i++) {
             const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
-            data[i] = Math.round(255 - 255 * (d / this.radius + this.cutoff));
+            data[i] = Math.round(base - scale * d);
         }
 
         return glyph;
