@@ -1,9 +1,9 @@
 {
-  "width": 50,
+  "width": 51,
   "height": 51,
-  "glyphWidth": 44,
+  "glyphWidth": 45,
   "glyphHeight": 45,
   "glyphTop": 40,
-  "glyphLeft": 0,
-  "glyphAdvance": 48.2197265625
+  "glyphLeft": 1,
+  "glyphAdvance": 48
 }

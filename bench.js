@@ -8,9 +8,6 @@ class MockTinySDF extends TinySDF {
     }
 }
 
-function bench(iterationsCount) {
-}
-
 const sdf = new MockTinySDF({
     fontSize: 48,
     buffer: 3

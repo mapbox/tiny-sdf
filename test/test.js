@@ -88,7 +88,7 @@ test('does not crash on diacritic marks', () => {
     sdf.draw('G̱'[1]);
 });
 
-test('does not return negative-width glylphs', () => {
+test('does not return negative-width glyphs', () => {
     const sdf = new MockTinySDF();
     // stub these because they vary across environments
     sdf.ctx.measureText = () => ({
