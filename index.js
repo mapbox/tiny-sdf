@@ -19,10 +19,10 @@ export default class TinySDF {
         fontStyle = 'normal',
         lang = null
     } = {}) {
-        this.buffer = buffer;
-        this.cutoff = cutoff;
-        this.radius = radius;
-        this.lang = lang;
+        this.buffer = buffer; // padding around a glyph's bounding box
+        this.radius = radius; // how many pixels around the glyph edge are encoded as signed distances
+        this.cutoff = cutoff; // how much of the SDF byte range represents inside vs outside the edge
+        this.lang = lang; // language of the Canvas drawing context
 
         // make the canvas size big enough to both have the specified buffer around the glyph
         // for "halo", and account for some glyphs possibly being larger than their font size
@@ -36,7 +36,8 @@ export default class TinySDF {
         ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
         ctx.fillStyle = 'black';
 
-        // temporary arrays for the distance transform
+        // two grids of squared distances: one for the outside of the glyph shape, one for the inside;
+        // the signed distance is derived as sqrt(outer) - sqrt(inner)
         this.gridOuter = new Float64Array(size * size);
         this.gridInner = new Float64Array(size * size);
         this.f = new Float64Array(size);
@@ -82,10 +83,13 @@ export default class TinySDF {
         ctx.fillText(char, buffer - glyphLeft, buffer + glyphTop);
         const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
 
-        // Initialize grids outside the glyph range to alpha 0
+        // default: outside the glyph (INF distance) for outer, inside (0 distance) for inner
         gridOuter.fill(INF, 0, len);
         gridInner.fill(0, 0, len);
 
+        // for anti-aliased pixels, treat partial coverage as a distance approximation:
+        // a fully covered pixel gets 0 outer / INF inner; a partial pixel gets a small
+        // non-zero outer or inner distance based on how far its coverage deviates from 0.5
         let imgIdx = 3; // start at the alpha channel of the first pixel
         for (let y = 0; y < glyphHeight; y++) {
             let j = (y + buffer) * width + buffer;
@@ -101,6 +105,9 @@ export default class TinySDF {
         edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
         edt(gridInner, buffer, buffer, glyphWidth, glyphHeight, width, this.f, this.v, this.z);
 
+        // encode signed distance as a byte: inside the glyph maps to high values, outside to low,
+        // with the edge gradient spanning [-radius * cutoff, radius * (1 - cutoff)] pixels around the edge;
+        // Uint8ClampedArray clamps beyond that
         const scale = 255 / this.radius;
         const base = 255 * (1 - this.cutoff);
         for (let i = 0; i < len; i++) {
