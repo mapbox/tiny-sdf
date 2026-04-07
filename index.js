@@ -90,7 +90,9 @@ export default class TinySDF {
                     gridInner[j] = INF;
 
                 } else { // aliased pixels
-                    const d = 0.5 - a;
+                    // gamma correction
+                    const aLin = Math.pow(a, 1.0 / 2.2);
+                    const d = 0.5 - aLin;
                     gridOuter[j] = d > 0 ? d * d : 0;
                     gridInner[j] = d < 0 ? d * d : 0;
                 }
