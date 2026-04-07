@@ -9,6 +9,7 @@
   "scripts": {
     "pretest": "eslint index.js index.html test",
     "test": "node --test",
+    "bench": "node ./test/bench.js",
     "start": "st --no-cache --localhost --index index.html ."
   },
   "repository": {
