@@ -106,7 +106,7 @@ export default class TinySDF {
         }
 
         edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
-        edt(gridInner, buffer, buffer, glyphWidth, glyphHeight, width, this.f, this.v, this.z);
+        edt(gridInner, 0, 0, width, height, width, this.f, this.v, this.z);
 
         // encode signed distance as a byte: inside the glyph maps to high values, outside to low,
         // with the edge gradient spanning [-radius * cutoff, radius * (1 - cutoff)] pixels around the edge;

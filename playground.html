@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>SDF — interactive viewer</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #141210;
+        color: #e7e5e4;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 16px;
+        color: #fde68a;
+      }
+      p.subtitle {
+        margin: 0 0 16px;
+        color: #78716c;
+        font-size: 12px;
+      }
+
+      #layout {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      #canvas-wrap {
+        background: #0c0a09;
+        border: 1px solid rgba(251, 191, 36, 0.14);
+        border-radius: 6px;
+        display: inline-block;
+      }
+      #canvas {
+        display: block;
+        image-rendering: pixelated;
+      }
+
+      #panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 260px;
+      }
+
+      .ctrl-group {
+        background: rgba(251, 191, 36, 0.05);
+        border: 1px solid rgba(251, 191, 36, 0.12);
+        border-radius: 6px;
+        padding: 10px 14px;
+      }
+      .ctrl-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #8a7a60;
+        margin-bottom: 8px;
+      }
+      .ctrl-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .ctrl-row:last-child {
+        margin-bottom: 0;
+      }
+      .ctrl-label {
+        color: #a8a29e;
+        font-size: 12px;
+        min-width: 72px;
+      }
+      .ctrl-val {
+        color: #fbbf24;
+        font-family: monospace;
+        font-size: 12px;
+        min-width: 40px;
+        text-align: right;
+      }
+      input[type="range"] {
+        flex: 1;
+        accent-color: #fbbf24;
+      }
+      input[type="text"] {
+        width: 40px;
+        background: rgba(251, 191, 36, 0.08);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        border-radius: 4px;
+        color: #e7e5e4;
+        font-size: 20px;
+        text-align: center;
+        padding: 2px 4px;
+      }
+
+      #info {
+        font-family: monospace;
+        font-size: 12px;
+        color: #c4a96d;
+        margin-top: 4px;
+      }
+
+      .note {
+        margin-top: 4px;
+        padding: 10px 14px;
+        background: rgba(251, 191, 36, 0.04);
+        border-left: 3px solid #d97706;
+        border-radius: 0 4px 4px 0;
+        font-size: 12px;
+        color: #a8a29e;
+        line-height: 1.7;
+      }
+      .note code {
+        background: rgba(251, 191, 36, 0.12);
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-size: 11px;
+        color: #fde68a;
+      }
+      .swatch-red {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #dc2626;
+        border-radius: 2px;
+        vertical-align: middle;
+        margin-right: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SDF — interactive viewer</h1>
+    <p class="subtitle">
+      Each pixel = normalized distance field value [0..1]. Black = outside ·
+      White = inside ·
+      <span class="swatch-red"></span> = iso-contour at cutoff.
+    </p>
+
+    <div id="panel">
+      <div class="ctrl-group">
+        <div class="ctrl-title">Character</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Char</span>
+          <input type="text" id="char" value="P" maxlength="2" />
+        </div>
+      </div>
+
+      <div class="ctrl-group">
+        <div class="ctrl-title">TinySDF parameters</div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">fontSize</span>
+          <input
+            type="range"
+            id="fontSize"
+            min="4"
+            max="640"
+            step="4"
+            value="256"
+          />
+          <span class="ctrl-val" id="fontSize-val">256</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">buffer</span>
+          <input type="range" id="buffer" min="2" max="24" step="1" value="8" />
+          <span class="ctrl-val" id="buffer-val">8</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">radius</span>
+          <input type="range" id="radius" min="2" max="24" step="1" value="8" />
+          <span class="ctrl-val" id="radius-val">8</span>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">cutoff</span>
+          <input
+            type="range"
+            id="cutoff"
+            min="0.10"
+            max="0.90"
+            step="0.05"
+            value="0.75"
+          />
+          <span class="ctrl-val" id="cutoff-val">0.75</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <code>buffer</code> : padding in px around the glyph (available gradient
+        zone).<br />
+        <code>radius</code> : max extent of the distance field from the edge.<br />
+        <code>cutoff</code> : SDF value at the exact shape edge.<br /><br />
+        The <span class="swatch-red"></span> red line is the iso-contour at
+        <code>cutoff × 255</code> — the threshold used by the fragment shader to
+        distinguish inside from outside.
+      </div>
+    </div>
+    <div id="layout">
+      <div>
+        <div id="canvas-wrap">
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="info">—</div>
+      </div>
+    </div>
+
+    <script type="module">
+      import TinySDF from "./index.js";
+
+      const SCALE = 2;
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const info = document.getElementById("info");
+
+      const charInput = document.getElementById("char");
+      const fontSizeInput = document.getElementById("fontSize");
+      const bufferInput = document.getElementById("buffer");
+      const radiusInput = document.getElementById("radius");
+      const cutoffInput = document.getElementById("cutoff");
+      const fontSizeVal = document.getElementById("fontSize-val");
+      const bufferVal = document.getElementById("buffer-val");
+      const radiusVal = document.getElementById("radius-val");
+      const cutoffVal = document.getElementById("cutoff-val");
+
+      function isCutoffContour(data, x, y, w, h, threshold) {
+        const inside = data[y * w + x] >= threshold;
+        const n = [
+          x > 0 ? data[y * w + x - 1] : data[y * w + x],
+          x < w - 1 ? data[y * w + x + 1] : data[y * w + x],
+          y > 0 ? data[(y - 1) * w + x] : data[y * w + x],
+          y < h - 1 ? data[(y + 1) * w + x] : data[y * w + x],
+        ];
+        return n.some((v) => v >= threshold !== inside);
+      }
+
+      function render() {
+        const char = charInput.value[0] ?? "P";
+        const fontSize = parseInt(fontSizeInput.value);
+        const buffer = parseInt(bufferInput.value);
+        const radius = parseInt(radiusInput.value);
+        const cutoff = parseFloat(cutoffInput.value);
+
+        fontSizeVal.textContent = String(fontSize);
+        bufferVal.textContent = String(buffer);
+        radiusVal.textContent = String(radius);
+        cutoffVal.textContent = cutoff.toFixed(2);
+
+        const sdf = new TinySDF({
+          fontSize,
+          buffer,
+          radius,
+          cutoff,
+          fontFamily: "sans-serif",
+        });
+        const { data, width, height } = sdf.draw(char);
+
+        info.textContent = `texture: ${width} × ${height} px  ·  displayed canvas: ${width * SCALE} × ${height * SCALE} px`;
+        canvas.width = width * SCALE;
+        canvas.height = height * SCALE;
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px";
+
+        const imageData = ctx.createImageData(canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const threshold = cutoff * 255;
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const val = data[y * width + x];
+            const onContour = isCutoffContour(
+              data,
+              x,
+              y,
+              width,
+              height,
+              threshold,
+            );
+            for (let dy = 0; dy < SCALE; dy++) {
+              for (let dx = 0; dx < SCALE; dx++) {
+                const i =
+                  ((y * SCALE + dy) * canvas.width + (x * SCALE + dx)) * 4;
+                pixels[i] = onContour ? 220 : val;
+                pixels[i + 1] = onContour ? 30 : val;
+                pixels[i + 2] = onContour ? 30 : val;
+                pixels[i + 3] = 255;
+              }
+            }
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      for (const el of [
+        charInput,
+        fontSizeInput,
+        bufferInput,
+        radiusInput,
+        cutoffInput,
+      ])
+        el.addEventListener("input", render);
+      render();
+    </script>
+  </body>
+</html>
