@@ -69,8 +69,8 @@ export default class TinySDF {
         const glyphLeft = Math.floor(actualBoundingBoxLeft);
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
-        const glyphWidth = Math.max(0, Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight) - glyphLeft));
-        const glyphHeight = Math.max(0, Math.min(this.size - this.buffer, glyphTop + Math.ceil(actualBoundingBoxDescent)));
+        const glyphWidth = Math.max(0, Math.min(this.size - this.buffer * 2, Math.ceil(actualBoundingBoxRight) + glyphLeft));
+        const glyphHeight = Math.max(0, Math.min(this.size - this.buffer * 2, glyphTop + Math.ceil(actualBoundingBoxDescent)));
 
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
@@ -83,7 +83,7 @@ export default class TinySDF {
         const {ctx, buffer, gridInner, gridOuter} = this;
         if (this.lang) ctx.lang = this.lang;
         ctx.clearRect(buffer, buffer, glyphWidth, glyphHeight);
-        ctx.fillText(char, buffer - glyphLeft, buffer + glyphTop);
+        ctx.fillText(char, buffer + glyphLeft, buffer + glyphTop);
         const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
 
         // default: outside the glyph (INF distance) for outer, inside (0 distance) for inner
