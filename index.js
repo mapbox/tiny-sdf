@@ -66,7 +66,9 @@ export default class TinySDF {
         // The integer/pixel part of the alignment is encoded in metrics.glyphTop/glyphLeft
         // The remainder is implicitly encoded in the rasterization
         const glyphTop = Math.ceil(actualBoundingBoxAscent);
-        const glyphLeft = Math.floor(actualBoundingBoxLeft);
+        // actualBoundingBoxLeft is positive when ink extends LEFT of the origin (per spec),
+        // so negate to get the ink's left edge in canvas x-coords (positive = right of origin)
+        const glyphLeft = Math.floor(-actualBoundingBoxLeft);
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
         const glyphWidth = Math.max(0, Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight) - glyphLeft));
@@ -106,7 +108,10 @@ export default class TinySDF {
         }
 
         edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
-        edt(gridInner, buffer, buffer, glyphWidth, glyphHeight, width, this.f, this.v, this.z);
+        // Pad the inner EDT region by 1 px so ink pixels touching the bbox edge can see the
+        // outside-ink seeds in the buffer region; clamp to buffer so we don't underflow when buffer=0
+        const pad = Math.min(buffer, 1);
+        edt(gridInner, buffer - pad, buffer - pad, glyphWidth + 2 * pad, glyphHeight + 2 * pad, width, this.f, this.v, this.z);
 
         // encode signed distance as a byte: inside the glyph maps to high values, outside to low,
         // with the edge gradient spanning [-radius * cutoff, radius * (1 - cutoff)] pixels around the edge;
