@@ -93,7 +93,7 @@ test('does not return negative-width glyphs', () => {
     // stub these because they vary across environments
     sdf.ctx.measureText = () => ({
         width: 0,
-        actualBoundingBoxLeft: 23.3759765625,
+        actualBoundingBoxLeft: -23.3759765625,
         actualBoundingBoxRight: -17.6162109375,
         actualBoundingBoxAscent: 20.2080078125,
         actualBoundingBoxDescent: -14.51953125,
