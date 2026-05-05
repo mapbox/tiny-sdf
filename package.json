@@ -35,10 +35,10 @@
   ],
   "devDependencies": {
     "canvas": "^3.2.3",
-    "eslint": "^10.2.0",
+    "eslint": "^10.3.0",
     "eslint-config-mourner": "^4.1.0",
     "eslint-plugin-html": "^8.1.4",
-    "pixelmatch": "^7.1.0",
+    "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
     "st": "^3.0.3"
   }
