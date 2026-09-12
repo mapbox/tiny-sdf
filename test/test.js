@@ -106,6 +106,37 @@ test('does not return negative-width glyphs', () => {
     assert.equal(glyph.width, 6); // zero-width glyph with 3px buffer
 });
 
+test('fits the distance grids and stays symmetric for a canvas-filling square clipped at the edge', () => {
+    const sdf = new MockTinySDF({fontSize: 20, buffer: 2});
+    const {size} = sdf;
+
+    sdf.ctx.measureText = () => ({
+        width: 40,
+        actualBoundingBoxLeft: 0,
+        actualBoundingBoxRight: 40,
+        actualBoundingBoxAscent: 30,
+        actualBoundingBoxDescent: 10
+    });
+    sdf.ctx.fillText = function () {
+        this.fillRect(0, 0, size, size);
+    };
+
+    const {data, width, height} = sdf.draw('X');
+    const longestLine = Math.max(width, height);
+
+    assert.ok(width > size && height > size, 'the padded glyph is bigger than the canvas');
+    assert.ok(width * height <= sdf.gridOuter.length, 'the padded glyph fits the distance grids');
+    assert.ok(longestLine <= sdf.f.length && longestLine <= sdf.v.length && longestLine < sdf.z.length,
+        'the padded glyph fits the 1D transform scratch arrays');
+
+    for (let y = 0; y < height; y++) {
+        const row = data.subarray(y * width, (y + 1) * width);
+        const mirroredRow = data.subarray((height - 1 - y) * width, (height - y) * width);
+        assert.deepEqual(row, mirroredRow, `row ${y} mirrors row ${height - 1 - y}`);
+        assert.deepEqual(row, row.slice().reverse(), `row ${y} is left-right symmetric`);
+    }
+});
+
 test('renders Chinese and Japanese versions of characters', () => {
     // assumes Noto Sans CJK SC font is installed
     const sdf1 = new MockTinySDF({fontFamily: 'Noto Sans CJK SC', lang: 'zh'});
