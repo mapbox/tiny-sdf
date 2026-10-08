@@ -36,13 +36,17 @@ export default class TinySDF {
         ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
         ctx.fillStyle = 'black';
 
+        // the glyph is rasterized at (buffer, buffer), so the canvas clips it to this
+        const maxGlyphDim = this.maxGlyphDim = size - buffer;
+        const gridDim = maxGlyphDim + 2 * buffer;
+
         // two grids of squared distances: one for the outside of the glyph shape, one for the inside;
         // the signed distance is derived as sqrt(outer) - sqrt(inner)
-        this.gridOuter = new Float64Array(size * size);
-        this.gridInner = new Float64Array(size * size);
-        this.f = new Float64Array(size);
-        this.z = new Float64Array(size + 1);
-        this.v = new Uint16Array(size);
+        this.gridOuter = new Float64Array(gridDim * gridDim);
+        this.gridInner = new Float64Array(gridDim * gridDim);
+        this.f = new Float64Array(gridDim);
+        this.z = new Float64Array(gridDim + 1);
+        this.v = new Uint16Array(gridDim);
     }
 
     _createCanvas(size) {
@@ -71,8 +75,8 @@ export default class TinySDF {
         const glyphLeft = Math.floor(-actualBoundingBoxLeft);
 
         // If the glyph overflows the canvas size, it will be clipped at the bottom/right
-        const glyphWidth = Math.max(0, Math.min(this.size - this.buffer, Math.ceil(actualBoundingBoxRight) - glyphLeft));
-        const glyphHeight = Math.max(0, Math.min(this.size - this.buffer, glyphTop + Math.ceil(actualBoundingBoxDescent)));
+        const glyphWidth = Math.max(0, Math.min(this.maxGlyphDim, Math.ceil(actualBoundingBoxRight) - glyphLeft));
+        const glyphHeight = Math.max(0, Math.min(this.maxGlyphDim, glyphTop + Math.ceil(actualBoundingBoxDescent)));
 
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
