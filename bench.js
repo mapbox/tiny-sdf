@@ -9,8 +9,10 @@ class MockTinySDF extends TinySDF {
 }
 
 const sdf = new MockTinySDF({
+    // same settings as GL JS uses for local glyphs
     fontSize: 48,
-    buffer: 3
+    buffer: 6,
+    radius: 16
 });
 
 // warmup

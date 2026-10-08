@@ -19,14 +19,14 @@ export default class TinySDF {
         fontStyle = 'normal',
         lang = null
     } = {}) {
-        this.buffer = buffer; // padding around a glyph's bounding box
+        buffer = this.buffer = Math.round(buffer); // padding around a glyph's bounding box; integer to keep the grid pixel-aligned
         this.radius = radius; // how many pixels around the glyph edge are encoded as signed distances
         this.cutoff = cutoff; // how much of the SDF byte range represents inside vs outside the edge
         this.lang = lang; // language of the Canvas drawing context
 
         // make the canvas size big enough to both have the specified buffer around the glyph
         // for "halo", and account for some glyphs possibly being larger than their font size
-        const size = this.size = fontSize + buffer * 4;
+        const size = this.size = Math.ceil(fontSize) + buffer * 4;
 
         const canvas = this._createCanvas(size);
         const ctx = this.ctx = canvas.getContext('2d', {willReadFrequently: true});
@@ -35,6 +35,7 @@ export default class TinySDF {
         ctx.textBaseline = 'alphabetic';
         ctx.textAlign = 'left'; // Necessary so that RTL text doesn't have different alignment
         ctx.fillStyle = 'black';
+        if (lang) ctx.lang = lang;
 
         // the glyph is rasterized at (buffer, buffer), so the canvas clips it to this
         const maxGlyphDim = this.maxGlyphDim = size - buffer;
@@ -81,13 +82,12 @@ export default class TinySDF {
         const width = glyphWidth + 2 * this.buffer;
         const height = glyphHeight + 2 * this.buffer;
 
-        const len = Math.max(width * height, 0);
+        const len = width * height;
         const data = new Uint8ClampedArray(len);
         const glyph = {data, width, height, glyphWidth, glyphHeight, glyphTop, glyphLeft, glyphAdvance};
         if (glyphWidth === 0 || glyphHeight === 0) return glyph;
 
         const {ctx, buffer, gridInner, gridOuter} = this;
-        if (this.lang) ctx.lang = this.lang;
         ctx.clearRect(buffer, buffer, glyphWidth, glyphHeight);
         ctx.fillText(char, buffer - glyphLeft, buffer + glyphTop);
         const imgData = ctx.getImageData(buffer, buffer, glyphWidth, glyphHeight);
@@ -111,7 +111,8 @@ export default class TinySDF {
             }
         }
 
-        edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z);
+        // columns left and right of the glyph have no seeds and stay INF in the column pass, so skip them
+        edt(gridOuter, 0, 0, width, height, width, this.f, this.v, this.z, buffer);
         // Pad the inner EDT region by 1 px so ink pixels touching the bbox edge can see the
         // outside-ink seeds in the buffer region; clamp to buffer so we don't underflow when buffer=0
         const pad = Math.min(buffer, 1);
@@ -119,12 +120,12 @@ export default class TinySDF {
 
         // encode signed distance as a byte: inside the glyph maps to high values, outside to low,
         // with the edge gradient spanning [-radius * cutoff, radius * (1 - cutoff)] pixels around the edge;
-        // Uint8ClampedArray clamps beyond that
+        // Uint8ClampedArray rounds and clamps beyond that
         const scale = 255 / this.radius;
         const base = 255 * (1 - this.cutoff);
         for (let i = 0; i < len; i++) {
             const d = Math.sqrt(gridOuter[i]) - Math.sqrt(gridInner[i]);
-            data[i] = Math.round(base - scale * d);
+            data[i] = base - scale * d;
         }
 
         return glyph;
@@ -132,8 +133,8 @@ export default class TinySDF {
 }
 
 // 2D Euclidean squared distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/papers/dt-final.pdf
-function edt(data, x0, y0, width, height, gridSize, f, v, z) {
-    for (let x = x0; x < x0 + width; x++) edt1d(data, y0 * gridSize + x, gridSize, height, f, v, z);
+function edt(data, x0, y0, width, height, gridSize, f, v, z, skipCols = 0) {
+    for (let x = x0 + skipCols; x < x0 + width - skipCols; x++) edt1d(data, y0 * gridSize + x, gridSize, height, f, v, z);
     for (let y = y0; y < y0 + height; y++) edt1d(data, y * gridSize + x0, 1, width, f, v, z);
 }
 
@@ -144,12 +145,13 @@ function edt1d(grid, offset, stride, length, f, v, z) {
     z[1] = INF;
     f[0] = grid[offset];
 
-    for (let q = 1, k = 0, s = 0; q < length; q++) {
-        f[q] = grid[offset + q * stride];
+    for (let q = 1, k = 0; q < length; q++) {
+        const fq = f[q] = grid[offset + q * stride];
         const q2 = q * q;
+        let s;
         do {
             const r = v[k];
-            s = (f[q] - f[r] + q2 - r * r) / (q - r) / 2;
+            s = (fq - f[r] + q2 - r * r) / (q - r) / 2;
         } while (s <= z[k] && --k > -1);
 
         k++;

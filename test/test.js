@@ -137,6 +137,14 @@ test('fits the distance grids and stays symmetric for a canvas-filling square cl
     }
 });
 
+test('keeps glyph dimensions integer with fractional fontSize and buffer', () => {
+    const sdf = new MockTinySDF({fontSize: 24.5, buffer: 2.6});
+    const {data, width, height} = sdf.draw('W');
+    assert.ok(Number.isInteger(width) && Number.isInteger(height));
+    assert.equal(data.length, width * height);
+    assert.ok(data.some(v => v > 191), 'glyph interior is rendered');
+});
+
 test('renders Chinese and Japanese versions of characters', () => {
     // assumes Noto Sans CJK SC font is installed
     const sdf1 = new MockTinySDF({fontFamily: 'Noto Sans CJK SC', lang: 'zh'});
